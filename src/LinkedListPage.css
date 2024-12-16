@@ -1,0 +1,32 @@
+@font-face {
+    font-family: "Grold Bold";
+    src: url('./assets/fonts/GroldBold.otf') format('truetype');
+  }
+  /* Font Credit: https://www.fontspring.com/fonts/typesketchbook/grold */
+
+.linkedListPage {
+    font-family: "Grold Bold", Arial;
+    letter-spacing: 0.5px;
+    height: 100vh;
+    color: white;
+}
+
+.header {
+    position: absolute;
+    top: 2%;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.header h1 {
+    font-size: 56px;
+}
+
+.header-image {
+    position: relative;
+    width: 25%;
+    height: auto;
+    left: 20px;
+}

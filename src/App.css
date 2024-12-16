@@ -1,38 +1,73 @@
+@font-face {
+  font-family: "Grold Bold";
+  src: url('./assets/fonts/GroldBold.otf') format('truetype');
+}
+/* Font Credit: https://www.fontspring.com/fonts/typesketchbook/grold */
+
 .App {
+  text-align: center;
+  font-family: "Grold Bold", Arial;
+  letter-spacing: 0.5px;
+  height: 100vh;
+  background: #000000;  /* fallback for old browsers */
+  background: -webkit-linear-gradient(to bottom left, #3F3F3F, #000000);  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to bottom left, #3F3F3F, #000000); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+}
+
+.header {
+  position: absolute;
+  top: 2%;
+  left: 50%;
+  transform: translateX(-50%);
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.header-image {
+  max-width: 100%;
+  height: auto;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.modules {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 20px;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.selection {
+  text-decoration: none;
+  color: white;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  width: 250px;
+  border: 2px solid #0F0F0F;
+  border-radius: 10px;
+  padding: 10px;
+  background-color: #1A1A1A;
+  transition: transform 0.3s ease, background-color 0.3s ease;
 }
 
-.App-link {
-  color: #61dafb;
+.selection:hover {
+  transform: scale(1.05);
+  background-color: #333333;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.selection-image {
+  width: 100%;
+  height: auto;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+
+.selection-text {
+  font-size: 28px;
+  font-weight: bold;
+  text-align: center;
 }
