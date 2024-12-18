@@ -1,20 +1,28 @@
 @font-face {
     font-family: "Grold Bold";
-    src: url('./assets/fonts/GroldBold.otf') format('truetype');
+    src: url('./assets/fonts/GroldBoldEdit.otf') format('truetype');
   }
   /* Font Credit: https://www.fontspring.com/fonts/typesketchbook/grold */
+  /* Numbers + Symbols: https://www.myfonts.com/collections/fontop-foundry?sort_by=price-ascending&pageType=foundryPage */
 
 .linkedListPage {
     font-family: "Grold Bold", Arial;
     letter-spacing: 0.5px;
     height: 100vh;
     color: white;
+    align-items: center;
+    padding: 250px;
 }
 
 .header {
-    position: absolute;
-    top: 2%;
-    margin: 0;
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.header {
+    margin-top: 20px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -22,11 +30,55 @@
 
 .header h1 {
     font-size: 56px;
+    margin: 0;
 }
 
 .header-image {
-    position: relative;
     width: 25%;
     height: auto;
-    left: 20px;
+    margin-left: 20px;
+}
+
+.node-container {
+    display: flex;
+    flex-direction: row;
+    margin-top: 100px;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+}  
+
+.node-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 2px solid #0F0F0F;
+    border-radius: 10px;
+    padding: 10px;
+    font-weight: bold;
+    background-color: #1A1A1A;
+    font-size: 36px;
+    color: #FFFFFF;
+    padding: 20px 20px;
+    min-width: 50px;
+    min-height: 50px;
+    box-sizing: border-box;
+    position: relative;
+    transition: transform 0.3s ease;
+    z-index: 1;
+}
+
+.node-box:hover {
+    transform: scale(1.05);
+    background-color: #333333;
+}
+
+.arrow {
+    font-size: 52px;
+    color: #FFFFFF;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    pointer-events: none;
 }
