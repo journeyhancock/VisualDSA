@@ -138,6 +138,11 @@ function LinkedListPage() {
                     value={insertValue}
                     onChange={(e) => setInsertValue(e.target.value)}
                     className="dropdown-input"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        listInsertValue();
+                      }
+                    }}
                   />
                 </div>
                 <div className="dropdown-option">
@@ -149,6 +154,11 @@ function LinkedListPage() {
                     value={deleteValue}
                     onChange={(e) => setDeleteValue(e.target.value)}
                     className="dropdown-input"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        listDeleteValue();
+                      }
+                    }}
                   />
                 </div>
               </div>
