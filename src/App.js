@@ -1,9 +1,11 @@
 import banner from './BannerText.png';
 import linkedListImg from './linkedList.png'; // Image Credit: https://github.com/ngryman/ds-linked-list
+import bstImg from './bst.png'; // Image Credit: https://www.cs.cmu.edu/~rdriley/121/notes/bst/
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import './App.css';
 
 import LinkedListPage from "./LinkedListPage";
+import BSTPage from "./BSTPage"
 
 function Layout({ children }) {
   return (
@@ -27,8 +29,10 @@ function App() {
                 <img src={linkedListImg} alt="Linked List" className="selection-image" />
                 <span className="selection-text">Linked List</span>
               </Link>
-              {/* <Link to="/page1" className="selection">Go to Page 2</Link>
-              <Link to="/page1" className="selection">Go to Page 3</Link> */}
+              <Link to="/binarysearchtree" className="selection">
+                <img src={bstImg} alt="Binary Search Tree" className="selection-image" />
+                <span className="selection-text">Binary Search Tree</span>
+              </Link>
             </div>
           </Layout>
         }/>
@@ -36,6 +40,11 @@ function App() {
         <Route path="/linkedlist" element={
           <Layout>
             <LinkedListPage />
+          </Layout>
+        }/>
+        <Route path="/binarysearchtree" element={
+          <Layout>
+            <BSTPage />
           </Layout>
         }/>
       </Routes>

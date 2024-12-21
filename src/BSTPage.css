@@ -1,0 +1,33 @@
+.linkedListPage {
+    font-family: "Grold Bold", Arial;
+    letter-spacing: 0.5px;
+    height: 100vh;
+    color: white;
+    align-items: center;
+    padding: 250px;
+}
+
+.header {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.header {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.header h1 {
+    font-size: 56px;
+    margin: 0;
+}
+
+.header-image {
+    width: 25%;
+    height: auto;
+    margin-left: 20px;
+}
