@@ -204,6 +204,12 @@ class BST {
 
         return nodes;
     }
+
+    getHeight = function() {
+        let curr = this.root;
+
+        
+    }
 }
 
 export { Node, BST };

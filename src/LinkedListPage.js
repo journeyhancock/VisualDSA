@@ -17,10 +17,6 @@ function LinkedListPage() {
 
   const edit = (index, newKey) => {
     newKey = newKey.trim()
-    if (!Number.isInteger(Number(newKey)) || newKey === "" || newKey.includes(".")) {
-      alert("Enter a valid integer");
-      return;
-    }
     let key = nodes[index];
     let temp = displayList.search(key);
     temp.key = Number(newKey);
@@ -40,8 +36,20 @@ function LinkedListPage() {
   }
 
   const nodeBlur = (index, e) => {
+    let newKey = e.target.textContent;
+    newKey = newKey.trim();
+
     if (index === currentEdit) {
-      edit(index, e.target.textContent);
+      // Check input is valid
+      if (!Number.isInteger(Number(newKey)) || newKey === "" || newKey.includes(".")) {
+        console.log(displayList.toArray());
+        // Reset node text if invalid input
+        e.target.textContent = nodes[index];
+        alert("Enter a valid integer");
+        return;
+      }
+
+      edit(index, newKey);
       setCurrentEdit(null);
     }
   }
