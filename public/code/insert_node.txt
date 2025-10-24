@@ -1,0 +1,9 @@
+Node* insert_node(Node* head, int val) {
+    Node* to_insert = new Node(val);
+
+    to_insert->next = head;
+
+    head = to_insert;
+
+    return head;
+}

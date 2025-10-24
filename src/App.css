@@ -144,12 +144,19 @@ body {
   color: inherit;
 }
 
-.back-link {
+.back-icon {
+  position: absolute;
+  top: 20px;
+  right: 25px;
+  z-index: 1100;
+  display: inline-block;
+  cursor: pointer;
   text-decoration: none;
 }
 
-.back-link:hover {
-  text-decoration: none;
+.back-icon img {
+  width: 28px;
+  height: 28px;
 }
 
 @media (max-width: 768px) {

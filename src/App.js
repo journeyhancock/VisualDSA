@@ -1,5 +1,5 @@
 import './App.css';
-import { BrowserRouter as Router, Routes, Route, Link} from 'react-router-dom';
+import {BrowserRouter as Router, Routes, Route, Link} from 'react-router-dom';
 import headerBanner from "./assets/images/banner_text.png";
 import linkedListImg from "./assets/images/linked_list.png"
 import bstImg from "./assets/images/bst.png"
