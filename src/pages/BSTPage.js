@@ -119,7 +119,7 @@ function BSTPage() {
             return;
         }
 
-        displayTree.current.listDelete(Number(trimmedVal));
+        displayTree.current.treeDelete(Number(trimmedVal));
         setDeleteValue("");
         updateNodes();
     }
