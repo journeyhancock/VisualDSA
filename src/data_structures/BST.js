@@ -181,7 +181,7 @@ class BST {
     }
 
     toArray = function() {
-        if (!this.root) return null;
+        if (!this.root) return [];
         
         const nodes = [];
         const queue = [this.root];
@@ -206,9 +206,9 @@ class BST {
     }
 
     getHeight = function() {
-        let curr = this.root;
+        //let curr = this.root;
 
-        
+        return 0
     }
 }
 

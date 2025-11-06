@@ -37,10 +37,12 @@ function Sidebar({isOpen, toggleSidebar}) {
 }
 
 function LinkedListPage() {
+    /* List Display */
     const displayList = useRef(new LinkedList());
     const initialized = useRef(false);
     const [nodes, setNodes] = useState(displayList.current.toArray());
 
+    /* Sidebar and Actions */
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [codeSnippet, setCodeSnippet] = useState(false);
     const [nodeSnippet, setNodeSnippet] = useState(false);
@@ -50,10 +52,12 @@ function LinkedListPage() {
         controls: false,
     });
 
+    /* Live Display Editing */
     const [insertValue, setInsertValue] = useState("");
     const [deleteValue, setDeleteValue] = useState("");
     const [editingIndex, setEditingIndex] = useState("");
 
+    /* Sidebar toggling and Actions opening */
     const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
     const togglePanel = (panel) => {
         setOpenPanels((prev) => ({
@@ -62,6 +66,7 @@ function LinkedListPage() {
         }));
     };
 
+    // Get sample display code
     useEffect(() => {
         fetch("/code/insert_node.txt")
             .then((res) => res.text())
@@ -76,6 +81,7 @@ function LinkedListPage() {
             .catch((err) => console.error("Error loading code:", err));
     }, []);
 
+    // Initialize Display
     useEffect(() => {
         if (initialized.current) return;
         initialized.current = true;
@@ -85,8 +91,10 @@ function LinkedListPage() {
         setNodes(list.toArray());
     }, []);
 
+    // Update nodes with the current display 
     const updateNodes = () => setNodes(displayList.current.toArray());
 
+    // Handle the actions menu actions and live display editing
     const handleInsert = () => {
         const trimmedVal = insertValue.trim()
 
