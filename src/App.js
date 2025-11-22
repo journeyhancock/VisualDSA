@@ -6,6 +6,8 @@ import bstImg from "./assets/images/bst.png"
 
 import LinkedListPage from "./pages/LinkedListPage";
 import BSTPage from "./pages/BSTPage";
+import LinkedListQuizPage from "./pages/LinkedListQuizPage";
+import BSTQuizPage from './pages/BSTQuizPage';
 
 import {useState} from "react";
 
@@ -23,14 +25,14 @@ function Sidebar({isOpen, toggleSidebar}) {
 
         <h3>Quiz</h3>
         <ul>
-          <li><Link to="/linkedlist" onClick={toggleSidebar}>Linked List</Link></li>
-          <li><Link to="/bst" onClick={toggleSidebar}>Binary Search Tree</Link></li>
+          <li><Link to="/quiz/linkedlist" onClick={toggleSidebar}>Linked List</Link></li>
+          <li><Link to="/quiz/bst" onClick={toggleSidebar}>Binary Search Tree</Link></li>
         </ul>
 
         <h3>Code</h3>
         <ul>
-          <li><Link to="/linkedlist" onClick={toggleSidebar}>Linked List</Link></li>
-          <li><Link to="/bst" onClick={toggleSidebar}>Binary Search Tree</Link></li>
+          <li><Link to="/code" onClick={toggleSidebar}>Linked List</Link></li>
+          <li><Link to="/code" onClick={toggleSidebar}>Binary Search Tree</Link></li>
         </ul>
       </div>
     </div>
@@ -88,6 +90,8 @@ function App() {
         <Route path="/" element={<Home toggleSidebar={toggleSidebar} />} />
         <Route path="/linkedlist" element={<LinkedListPage />} />
         <Route path="/bst" element={<BSTPage />} />
+        <Route path="/quiz/linkedlist" element={<LinkedListQuizPage />} />
+        <Route path="/quiz/bst" element={<BSTQuizPage />} />
       </Routes>
     </Router>
   );

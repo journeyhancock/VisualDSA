@@ -22,14 +22,14 @@ function Sidebar({isOpen, toggleSidebar}) {
 
         <h3>Quiz</h3>
         <ul>
-          <li><Link to="/linkedlist" onClick={toggleSidebar}>Linked List</Link></li>
-          <li><Link to="/bst" onClick={toggleSidebar}>Binary Search Tree</Link></li>
+          <li><Link to="/quiz/linkedlist" onClick={toggleSidebar}>Linked List</Link></li>
+          <li><Link to="/quiz/bst" onClick={toggleSidebar}>Binary Search Tree</Link></li>
         </ul>
 
         <h3>Code</h3>
         <ul>
-          <li><Link to="/linkedlist" onClick={toggleSidebar}>Linked List</Link></li>
-          <li><Link to="/bst" onClick={toggleSidebar}>Binary Search Tree</Link></li>
+          <li><Link to="/code" onClick={toggleSidebar}>Linked List</Link></li>
+          <li><Link to="/code" onClick={toggleSidebar}>Binary Search Tree</Link></li>
         </ul>
       </div>
     </div>
