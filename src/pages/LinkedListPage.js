@@ -66,6 +66,8 @@ function LinkedListPage() {
         }));
     };
 
+    const [animating, setAnimating] = useState(false);
+
     // Get sample display code
     useEffect(() => {
         fetch("/code/insert_node.txt")
@@ -96,30 +98,87 @@ function LinkedListPage() {
 
     // Handle the actions menu actions and live display editing
     const handleInsert = () => {
-        const trimmedVal = insertValue.trim()
-
+        const trimmedVal = insertValue.trim();
         if (verifyInput(trimmedVal)) {
             alert("Enter a valid integer");
             return;
         }
 
-        displayList.current.insert(Number(trimmedVal));
+        const val = Number(trimmedVal);
         setInsertValue("");
-        updateNodes();
-    }
+
+        // Show new node animation
+        setAnimating(true);
+        setNodes((prev) => [{ value: val, animClass: "node-inserting" }, ...prev.map(v => ({ value: v, animClass: "" }))]);
+
+        // After animation ends, update actual data
+        setTimeout(() => {
+            displayList.current.insert(val);
+            updateNodes();
+            setAnimating(false);
+        }, 800);
+    };
 
     const handleDelete = () => {
-        const trimmedVal = deleteValue.trim()
-
+        const trimmedVal = deleteValue.trim();
         if (verifyInput(trimmedVal)) {
             alert("Enter a valid integer");
             return;
         }
 
-        displayList.current.listDelete(Number(trimmedVal));
+        const val = Number(trimmedVal);
         setDeleteValue("");
-        updateNodes();
-    }
+        setAnimating(true);
+
+        const currentNodes = [...nodes];
+        let i = 0;
+
+        setNodes((prev) =>
+            prev.map((v, idx) => ({
+                value: v.value ?? v,
+                animClass: idx === i ? "node-highlight" : "",
+            })) 
+        );
+
+        const highlightInterval = setInterval(() => {
+            const nodeValue = currentNodes[i].value ?? currentNodes[i];
+
+            if (nodeValue === val) {
+                clearInterval(highlightInterval);
+
+                setTimeout(() => {
+                    setNodes((prev) =>
+                    prev.map((v, idx) =>
+                        idx === i
+                        ? { value: v.value ?? v, animClass: "node-deleting" }
+                        : v
+                    )
+                    );
+                }, 400);
+
+                setTimeout(() => {
+                    displayList.current.listDelete(val);
+                    updateNodes();
+                    setAnimating(false);
+                }, 1000);
+            } else {
+                i++;
+                if (i >= currentNodes.length) {
+                    clearInterval(highlightInterval);
+                    setAnimating(false);
+                    return;
+                }
+
+                // Highlight the next node
+                setNodes((prev) =>
+                    prev.map((v, idx) => ({
+                    value: v.value ?? v,
+                    animClass: idx === i ? "node-highlight" : "",
+                    }))
+                );
+            }
+        }, 600);
+    };
 
     const handleEdit = (index, newVal) => {
         newVal = newVal.trim();
@@ -188,25 +247,25 @@ function LinkedListPage() {
                 {/* Visualization */}
                 <div className="visualization-area">
                     <div className="node-container">
-                        {nodes.map((value, index) => (
+                        {nodes.map((node, index) => {
+                        const value = typeof node === "object" ? node.value : node;
+                        return (
                             <React.Fragment key={index}>
-                                <div 
-                                    key={index}
-                                    className="node-box"
-                                    contentEditable={editingIndex === index}
-                                    suppressContentEditableWarning="true"
-                                    onClick={() => handleClick(index)}
-                                    onBlur={(e) => handleBlur(e, index)}
-                                    onKeyDown={(e) => handleEnter(e, index)}
-                                    onMouseEnter={() => handleMouseEnter(index)}
-                                    >
-                                    {value}
-                                </div>
-                                {index < nodes.length - 1 && (
-                                    <div className="arrow">→</div>
-                                )}
+                            <div
+                                className={`node-box ${node.animClass || ""}`}
+                                contentEditable={editingIndex === index}
+                                suppressContentEditableWarning
+                                onClick={() => handleClick(index)}
+                                onBlur={(e) => handleBlur(e, index)}
+                                onKeyDown={(e) => handleEnter(e, index)}
+                                onMouseEnter={() => handleMouseEnter(index)}
+                            >
+                                {value}
+                            </div>
+                            {index < nodes.length - 1 && <div className="arrow">→</div>}
                             </React.Fragment>
-                        ))}
+                        );
+                        })}
                     </div>
                 </div>
 

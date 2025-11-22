@@ -337,3 +337,36 @@
 .back-link:hover {
     text-decoration: underline;
 }
+
+@keyframes insertNode {
+  0% {
+    opacity: 0;
+    transform: scale(0.5) translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes highlightNode {
+  0% { background-color: #ffcc00; transform: scale(1.1); }
+  100% { background-color: #13171D; transform: scale(1); }
+}
+
+@keyframes deleteNode {
+  0% { background-color: #e74c3c; transform: scale(1); opacity: 1; }
+  100% { transform: scale(0.5); opacity: 0; }
+}
+
+.node-inserting {
+  animation: insertNode 0.8s ease-out forwards;
+}
+
+.node-highlight {
+  animation: highlightNode 0.5s ease-in-out forwards;
+}
+
+.node-deleting {
+  animation: deleteNode 0.6s ease forwards;
+}
