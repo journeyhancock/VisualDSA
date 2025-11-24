@@ -6,366 +6,457 @@ import "../App.css";
 import "./styles/BSTPage.css";
 
 function verifyInput(value) {
-    return (!Number.isInteger(Number(value)) || value === "" || value.includes("."));
+	return (!Number.isInteger(Number(value)) || value === "" || value.includes("."));
 }
 
 function Sidebar({ isOpen, toggleSidebar }) {
-    return (
-        <div className={`sidebar ${isOpen ? "open" : ""}`}>
-            <div className="sidebar-list">
-                <h3>New Canvas</h3>
-                <h3>Visualize</h3>
-                <ul>
-                    <li>
-                        <Link to="/linkedlist" onClick={toggleSidebar}>Linked List</Link>
-                    </li>
-                    <li>
-                        <Link to="/bst" onClick={toggleSidebar}>Binary Search Tree</Link>
-                    </li>
-                </ul>
-                <h3>Quiz</h3>
-                <ul>
-                    <li>
-                        <Link to="/quiz/linkedlist" onClick={toggleSidebar}>Linked List</Link>
-                    </li>
-                    <li>
-                        <Link to="/quiz/bst" onClick={toggleSidebar}>Binary Search Tree</Link>
-                    </li>
-                </ul>
-                <h3>Code</h3>
-                <ul>
-                    <li>
-                        <Link to="/code" onClick={toggleSidebar}>Linked List</Link>
-                    </li>
-                    <li>
-                        <Link to="/code" onClick={toggleSidebar}>Binary Search Tree</Link>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    );
+	return (
+		<div className={`sidebar ${isOpen ? "open" : ""}`}>
+			<div className="sidebar-list">
+				<h3>New Canvas</h3>
+				<h3>Visualize</h3>
+				<ul>
+					<li>
+						<Link to="/linkedlist" onClick={toggleSidebar}>Linked List</Link>
+					</li>
+					<li>
+						<Link to="/bst" onClick={toggleSidebar}>Binary Search Tree</Link>
+					</li>
+				</ul>
+				<h3>Quiz</h3>
+				<ul>
+					<li>
+						<Link to="/quiz/linkedlist" onClick={toggleSidebar}>Linked List</Link>
+					</li>
+					<li>
+						<Link to="/quiz/bst" onClick={toggleSidebar}>Binary Search Tree</Link>
+					</li>
+				</ul>
+				<h3>Code</h3>
+				<ul>
+					<li>
+						<Link to="/code" onClick={toggleSidebar}>Linked List</Link>
+					</li>
+					<li>
+						<Link to="/code" onClick={toggleSidebar}>Binary Search Tree</Link>
+					</li>
+				</ul>
+			</div>
+		</div>
+	);
 }
 
 function BSTPage() {
-    // Tree Display
-    const displayTree = useRef(new BST());
-    const initialized = useRef(false);
-    const [nodes, setNodes] = useState(displayTree.current.toArray());
+	// Tree Display
+	const displayTree = useRef(new BST());
+	const initialized = useRef(false);
+	const [nodes, setNodes] = useState(displayTree.current.toArray());
 
-    // Sidebar and Actions
-    const [sidebarOpen, setSidebarOpen] = useState(false);
-    const [codeSnippet, setCodeSnippet] = useState(false);
-    const [nodeSnippet, setNodeSnippet] = useState(false);
-    const [openPanels, setOpenPanels] = useState({
-        nodes: false,
-        actions: false,
-        controls: false,
-    });
+	// Sidebar and Actions
+	const [sidebarOpen, setSidebarOpen] = useState(false);
+	const [codeSnippet, setCodeSnippet] = useState(false);
+	const [nodeSnippet, setNodeSnippet] = useState(false);
+	const [openPanels, setOpenPanels] = useState({
+		nodes: false,
+		actions: false,
+		controls: false,
+	});
 
-    // Live Display Editing
-    const [insertValue, setInsertValue] = useState("");
-    const [deleteValue, setDeleteValue] = useState("");
-    const [editingIndex, setEditingIndex] = useState("");
+	// Live Display Editing
+	const [insertValue, setInsertValue] = useState("");
+	const [deleteValue, setDeleteValue] = useState("");
+	const [editingIndex, setEditingIndex] = useState(null);
 
-    // Sidebar toggling and Actions opening
-    const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
-    const togglePanel = (panel) => {
-        setOpenPanels((prev) => ({
-            ...prev,
-            [panel]: !prev[panel],
-        }));
-    };
+	// Animation / highlights
+	const [animating, setAnimating] = useState(false);
+	const [highlightedKey, setHighlightedKey] = useState(null);
+	const [deletedKey, setDeletedKey] = useState(null);
+	const [insertedKey, setInsertedKey] = useState(null);
+	const [hoveredKey, setHoveredKey] = useState(null);
 
-    // Get sample display code
-    useEffect(() => {
-        fetch("/code/insert_node.txt")
-            .then((res) => res.text())
-            .then((text) => setCodeSnippet(text))
-            .catch((err) => console.error("Error loading code:", err));
-    }, []);
+	// Sidebar toggles
+	const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+	const togglePanel = (panel) => {
+		setOpenPanels((prev) => ({
+			...prev,
+			[panel]: !prev[panel],
+		}));
+	};
 
-    useEffect(() => {
-        fetch("/code/node.txt")
-            .then((res) => res.text())
-            .then((text) => setNodeSnippet(text))
-            .catch((err) => console.error("Error loading code:", err));
-    }, []);
+	useEffect(() => {
+		fetch("/code/insert_node.txt")
+			.then((res) => res.text())
+			.then((text) => setCodeSnippet(text))
+			.catch((err) => console.error("Error loading code:", err));
+	}, []);
 
-    // Initialize Display
-    useEffect(() => {
-        if (initialized.current) return;
-        initialized.current = true;
+	useEffect(() => {
+		fetch("/code/node.txt")
+			.then((res) => res.text())
+			.then((text) => setNodeSnippet(text))
+			.catch((err) => console.error("Error loading code:", err));
+	}, []);
 
-        const tree = displayTree.current;
-        tree.root = new Node();
-        tree.root.key = 1;
-        [5, 4, 3, 2].forEach((val) => tree.insert(val));
-        setNodes(tree.toArray());
-    }, []);
+	useEffect(() => {
+		if (initialized.current) return;
+		initialized.current = true;
 
-    // Update nodes with the current display
-    const updateNodes = () => setNodes(displayTree.current.toArray());
+		const tree = displayTree.current;
+		tree.root = new Node();
+		tree.root.key = 5;
+		[3, 9].forEach((val) => tree.insert(val));
+		setNodes(tree.toArray());
+	}, []);
 
-    // Handle the actions menu actions and live display editing
-    const handleInsert = () => {
-        const trimmedVal = insertValue.trim();
+	const updateNodes = () => setNodes(displayTree.current.toArray());
 
-        if (verifyInput(trimmedVal)) {
-            alert("Enter a valid integer");
-            return;
-        }
+	const getTraversalPath = (val) => {
+		const path = [];
+		let current = displayTree.current.root;
+		while (current) {
+			path.push(current.key);
+			if (val === current.key) break;
+			if (val < current.key) current = current.left;
+			else current = current.right;
+		}
+		return path;
+	};
 
-        displayTree.current.insert(Number(trimmedVal));
-        setInsertValue("");
-        updateNodes();
-    };
+	const handleInsert = async () => {
+		const trimmedVal = insertValue.trim();
+		if (verifyInput(trimmedVal)) {
+			alert("Enter a valid integer");
+			return;
+		}
 
-    const handleDelete = () => {
-        const trimmedVal = deleteValue.trim();
+		const val = Number(trimmedVal);
+		setInsertValue("");
 
-        if (verifyInput(trimmedVal)) {
-            alert("Enter a valid integer");
-            return;
-        }
+		if (displayTree.current.search && displayTree.current.search(val)) {
+			alert("Duplicate keys are not allowed.");
+			return;
+		}
 
-        displayTree.current.treeDelete(Number(trimmedVal));
-        setDeleteValue("");
-        updateNodes();
-    };
+		if (animating) return;
+		setAnimating(true);
 
-    const handleEdit = (oldKey, newVal) => {
-        newVal = newVal.trim();
+		const path = getTraversalPath(val);
+		for (let i = 0; i < path.length; i++) {
+			setHighlightedKey(path[i]);
+			await new Promise((res) => setTimeout(res, 500));
+		}
 
-        if (verifyInput(newVal)) {
-            alert("Enter a valid integer");
-            return;
-        }
+		displayTree.current.insert(val);
+		updateNodes();
+		setInsertedKey(val);
 
-        const tree = displayTree.current;
-        const newKey = Number(newVal);
+		await new Promise((res) => setTimeout(res, 800));
+		setInsertedKey(null);
 
-        // Only perform fix-up if the key actually changed
-        if (newKey !== oldKey) {
-            // Remove the old key and reinsert new one to maintain BST property
-            tree.treeDelete(oldKey);
-            tree.insert(newKey);
-            updateNodes();
-        }
-    };
+		setHighlightedKey(null);
+		setAnimating(false);
+	};
 
-    const handleBlur = (e, key) => {
-        const newVal = e.target.textContent.trim();
-        if (editingIndex === key) {
-            if (verifyInput(newVal)) {
-                alert("Enter a valid integer");
-                e.target.textContent = key;
-                return;
-            }
-            handleEdit(key, newVal);
-            setEditingIndex(null);
-        }
-    };
+	const handleDelete = async () => {
+		const trimmedVal = deleteValue.trim();
+		if (verifyInput(trimmedVal)) {
+			alert("Enter a valid integer");
+			return;
+		}
 
-    const handleEnter = (e) => {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            e.target.blur();
-        }
-    };
+		const val = Number(trimmedVal);
+		setDeleteValue("");
 
-    const handleClick = (key) => {
-        setEditingIndex(key);
-    };
+		if (animating) return;
+		setAnimating(true);
 
-    const handleMouseEnter = (key) => {
-        setEditingIndex(key);
-    };
+		const path = getTraversalPath(val);
 
-const renderTree = (node, x = 0, y = 0, level = 0, spacing = 220, lines = []) => {
-        if (!node) return { elements: [], lines };
-        const offset = spacing / Math.pow(2, level);
-        const cx = x, cy = y;
+		for (let i = 0; i < path.length; i++) {
+			setHighlightedKey(path[i]);
+			await new Promise((res) => setTimeout(res, 500));
+		}
 
-        const elements = [
-                <div
-                    className="tree-node"
-                    style={{
-                            left: `calc(50% + ${x}px)`,
-                            top: `${y}px`,
-                            width: "50px",
-                            height: "50px",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            borderRadius: "50%",
-                            border: "2px solid #2D333B",
-                            backgroundColor: "#13171D",
-                            color: "#F0F6FC",
-                            fontSize: "18px",
-                            textAlign: "center",
-                            overflow: "hidden",
-                    }}
-                    contentEditable={editingIndex === node.key}
-                    suppressContentEditableWarning={true}
-                    onClick={() => handleClick(node.key)}
-                    onBlur={(e) => handleBlur(e, node.key)}
-                    onKeyDown={(e) => handleEnter(e)}
-                    onMouseEnter={() => handleMouseEnter(node.key)}
-                    onFocus={(e) => {
-                            // Prevent default blue outline on focus
-                            e.target.style.outline = "none";
-                    }}
-                >
-                    <span style={{ display: "inline-block", width: "100%", textAlign: "center" }}>
-                            {node.key}
-                    </span>
-                </div>
-        ];
+		if (path.length === 0 || path[path.length - 1] !== val) {
+			setHighlightedKey(null);
+			setAnimating(false);
+			alert("Value not found in tree.");
+			return;
+		}
 
-        if (node.left) {
-            const lx = x - offset;
-            const ly = y + 100;
-            lines.push({ x1: cx, y1: cy, x2: lx, y2: ly });
-            const left = renderTree(node.left, lx, ly, level + 1, spacing, lines);
-            elements.push(...left.elements);
-        }
+		setDeletedKey(val);
+		await new Promise((res) => setTimeout(res, 700));
 
-        if (node.right) {
-            const rx = x + offset;
-            const ry = y + 100;
-            lines.push({ x1: cx, y1: cy, x2: rx, y2: ry });
-            const right = renderTree(node.right, rx, ry, level + 1, spacing, lines);
-            elements.push(...right.elements);
-        }
+		displayTree.current.treeDelete(val);
+		updateNodes();
 
-        return { elements, lines };
+		await new Promise((res) => setTimeout(res, 600));
+
+		setDeletedKey(null);
+		setHighlightedKey(null);
+		setAnimating(false);
+	};
+
+	const handleEdit = (oldKey, newValStr) => {
+		const newValTrim = newValStr.trim();
+		if (verifyInput(newValTrim)) {
+			alert("Enter a valid integer");
+			return;
+		}
+		const newKey = Number(newValTrim);
+		const tree = displayTree.current;
+
+		const found = tree.search && tree.search(newKey);
+		if (found && newKey !== oldKey) {
+				alert("Duplicate keys are not allowed.");
+				const el = document.querySelector(`.tree-node[data-key='${oldKey}']`);
+				if (el) el.textContent = oldKey;
+				updateNodes();
+				return;
+		}
+
+		if (newKey === oldKey) {
+			updateNodes();
+			return;
+		}
+
+		setAnimating(true);
+		setHighlightedKey(oldKey);
+		setTimeout(() => {
+			tree.treeDelete(oldKey);
+			tree.insert(newKey);
+			updateNodes();
+			setInsertedKey(newKey);
+			setHighlightedKey(null);
+			setTimeout(() => {
+				setInsertedKey(null);
+				setAnimating(false);
+			}, 700);
+		}, 450);
+	};
+
+	const handleBlur = (e, key) => {
+		const newVal = e.target.textContent.trim();
+		if (editingIndex === key) {
+			if (verifyInput(newVal)) {
+				alert("Enter a valid integer");
+				e.target.textContent = key;
+				setEditingIndex(null);
+				return;
+			}
+			handleEdit(key, newVal);
+			setEditingIndex(null);
+		}
+	};
+
+	const handleEnter = (e) => {
+		if (e.key === "Enter") {
+			e.preventDefault();
+			e.target.blur();
+		}
+	};
+
+	const handleClick = (key) => {
+		if (animating) return;
+		setEditingIndex(key);
+
+		setTimeout(() => {
+				const el = document.querySelector(`.tree-node[data-key='${key}']`);
+				if (el) {
+				el.setAttribute("contenteditable", "true");
+				el.focus();
+
+				const range = document.createRange();
+				const sel = window.getSelection();
+				range.selectNodeContents(el);
+				range.collapse(false);
+				sel.removeAllRanges();
+				sel.addRange(range);
+				}
+		}, 0);
 };
 
+	const handleMouseEnter = (key) => {
+		setHoveredKey(key);
+	};
 
-    const {elements, lines} = renderTree(displayTree.current.root);
-    return (
-        <div className="bst-page">
-            {/* Sidebar */}
-            <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar}/>
+	const handleMouseLeave = () => {
+		setHoveredKey(null);
+	};
 
-            {/* Hamburger Sidebar */}
-            <div className="hamburger" onClick={toggleSidebar}>
-                <div className="bar"></div>
-                <div className="bar"></div>
-                <div className="bar"></div>
-            </div>
+	const renderTree = (node, x = 0, y = 0, level = 0, spacing = 220, lines = []) => {
+		if (!node) return { elements: [], lines };
+		const offset = spacing / Math.pow(2, level);
+		const cx = x, cy = y;
 
-            {/* Title */}
-            <h1 className="page-title">Binary Search Tree</h1>
+		const nodeClasses = [
+			"tree-node",
+			highlightedKey === node.key ? "node-highlight" : "",
+			deletedKey === node.key ? "node-deleting" : "",
+			insertedKey === node.key ? "node-inserting" : "",
+			hoveredKey === node.key ? "node-hovered" : "",
+		].join(" ");
 
-            {/* Return to home */}
-            <Link to="/" className="back-icon">
-                <img src="/favicon.ico" alt="Back to Home" />
-            </Link>
+		const elements = [
+			<div
+				key={node.key}
+				data-key={node.key}
+				className={nodeClasses}
+				style={{
+					left: `calc(50% + ${x}px)`,
+					top: `${y}px`,
+				}}
+				contentEditable={editingIndex === node.key}
+				autoFocus={editingIndex === node.key}
+				suppressContentEditableWarning
+				onClick={() => handleClick(node.key)}
+				onBlur={(e) => handleBlur(e, node.key)}
+				onKeyDown={(e) => handleEnter(e)}
+				onMouseEnter={() => handleMouseEnter(node.key)}
+				onMouseLeave={() => handleMouseLeave()}
+				tabIndex={0}
+			>
+				<span>{node.key}</span>
+			</div>
+		];
 
-            {/* Content */}
-            <div className="bst-content">
-                {/* Visualization */}
-                <div className="visualization-area">
-                    <div className="tree-container">
-                        <svg className="tree-lines">
-                        {lines.map((l, i) => (
-                            <line
-                            key={i}
-                            x1={`calc(50% + ${l.x1}px)`}
-                            y1={l.y1 + 25}
-                            x2={`calc(50% + ${l.x2}px)`}
-                            y2={l.y2}
-                            stroke="#F0F6FC"
-                            strokeWidth="2"
-                            />
-                        ))}
-                        </svg>
+		if (node.left) {
+			const lx = x - offset;
+			const ly = y + 100;
+			lines.push({ x1: cx, y1: cy, x2: lx, y2: ly });
+			const left = renderTree(node.left, lx, ly, level + 1, spacing, lines);
+			elements.push(...left.elements);
+		}
 
-                        <div className="tree-layout">{elements}</div>
-                    </div>
-                </div>
+		if (node.right) {
+			const rx = x + offset;
+			const ry = y + 100;
+			lines.push({ x1: cx, y1: cy, x2: rx, y2: ry });
+			const right = renderTree(node.right, rx, ry, level + 1, spacing, lines);
+			elements.push(...right.elements);
+		}
 
-                {/* Side actions */}
-                <div className="side-actions">
-                    {/* Nodes panel */}
-                    <div className="panel nodes-panel">
-                        <div className="panel-header" onClick={() => togglePanel("nodes")}>
-                            <div className={`triangle-icon ${openPanels.nodes ? "open" : ""}`}></div>
-                            <h3>Nodes</h3>
-                        </div> 
+		return { elements, lines };
+	};
 
-                        {openPanels.nodes && (
-                            <div className="panel-body nodes-body">
-                                <div className="code-panel small">
-                                    <pre><code>{nodeSnippet}</code></pre>
-                                </div>
-                            </div>
-                        )}
-                    </div>
+	const { elements, lines } = renderTree(displayTree.current.root);
 
-                    {/* Actions panel */}
-                    <div className="panel actions-panel">
-                        <div className="panel-header" onClick={() => togglePanel("actions")}>
-                            <div className={`triangle-icon ${openPanels.actions ? "open" : ""}`}></div>
-                            <h3>Actions</h3>
-                        </div> 
+	return (
+		<div className="bst-page">
+			{/* Sidebar */}
+			<Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
 
-                        {openPanels.actions && (
-                            <div className="panel-body actions-body">
-                                <div className="actions-row">
-                                    <button className="actions-button" onClick={handleInsert}>Insert</button>
-                                    <input 
-                                        type="text" 
-                                        placeholder="Type a value here"
-                                        value={insertValue}
-                                        onChange={(e) => setInsertValue(e.target.value)}
-                                    />
-                                </div>
+			{/* Hamburger */}
+			<div className="hamburger" onClick={toggleSidebar}>
+				<div className="bar"></div>
+				<div className="bar"></div>
+				<div className="bar"></div>
+			</div>
 
-                                <div className="actions-row">
-                                    <button className="actions-button" onClick={handleDelete}>Delete</button>
-                                    <input 
-                                        type="text" 
-                                        placeholder="Type a value here"
-                                        value={deleteValue}
-                                        onChange={(e) => setDeleteValue(e.target.value)}
-                                    />
-                                </div>
-                            </div>
-                        )}
-                    </div>
+			<h1 className="page-title">Binary Search Tree</h1>
 
-                    {/* Controls panel */}
-                    <div className="panel controls-panel">
-                        <div className="panel-header" onClick={() => togglePanel("controls")}>
-                            <div className={`triangle-icon ${openPanels.controls ? "open" : ""}`}></div>
-                            <h3>Controls</h3>
-                        </div> 
+			<Link to="/" className="back-icon">
+				<img src="/favicon.ico" alt="Back to Home" />
+			</Link>
 
-                        {openPanels.controls && (
-                            <div className="panel-body controls-body">
-                                <div className="controls-row">
-                                    <button className="controls-button">&gt; Play</button>
-                                    <button className="controls-button">&gt;&gt; Step</button>
-                                </div>
-                                <div className="controls-row">
-                                    <button className="controls-button">|| Pause</button>
-                                    <button className="controls-button">&lt;&lt; Step</button>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
+			<div className="bst-content">
+				<div className="visualization-area">
+					<div className="tree-container">
+						<svg className="tree-lines">
+							{lines.map((l, i) => (
+								<line
+									key={i}
+									x1={`calc(50% + ${l.x1}px)`}
+									y1={l.y1 + 25}
+									x2={`calc(50% + ${l.x2}px)`}
+									y2={l.y2 + 25}
+									stroke="#F0F6FC"
+									strokeWidth="2"
+								/>
+							))}
+						</svg>
 
-                {/* Code */}
-                <div className="code-panel">
-                    <pre><code>{codeSnippet}</code></pre>
-                </div>
-            </div>
+						<div className="tree-layout">{elements}</div>
+					</div>
+				</div>
 
-        </div>
-    );
+				{/* Side Actions */}
+				<div className="side-actions">
+					<div className="panel nodes-panel">
+						<div className="panel-header" onClick={() => togglePanel("nodes")}>
+							<div className={`triangle-icon ${openPanels.nodes ? "open" : ""}`}></div>
+							<h3>Nodes</h3>
+						</div>
+
+						{openPanels.nodes && (
+							<div className="panel-body nodes-body">
+								<div className="code-panel small">
+									<pre><code>{nodeSnippet}</code></pre>
+								</div>
+							</div>
+						)}
+					</div>
+
+					<div className="panel actions-panel">
+						<div className="panel-header" onClick={() => togglePanel("actions")}>
+							<div className={`triangle-icon ${openPanels.actions ? "open" : ""}`}></div>
+							<h3>Actions</h3>
+						</div>
+
+						{openPanels.actions && (
+							<div className="panel-body actions-body">
+								<div className="actions-row">
+									<button className="actions-button" onClick={handleInsert}>Insert</button>
+									<input
+										type="text"
+										placeholder="Type a value here"
+										value={insertValue}
+										onChange={(e) => setInsertValue(e.target.value)}
+										disabled={animating}
+									/>
+								</div>
+
+								<div className="actions-row">
+									<button className="actions-button" onClick={handleDelete}>Delete</button>
+									<input
+										type="text"
+										placeholder="Type a value here"
+										value={deleteValue}
+										onChange={(e) => setDeleteValue(e.target.value)}
+										disabled={animating}
+									/>
+								</div>
+							</div>
+						)}
+					</div>
+
+					<div className="panel controls-panel">
+						<div className="panel-header" onClick={() => togglePanel("controls")}>
+							<div className={`triangle-icon ${openPanels.controls ? "open" : ""}`}></div>
+							<h3>Controls</h3>
+						</div>
+
+						{openPanels.controls && (
+							<div className="panel-body controls-body">
+								<div className="controls-row">
+									<button className="controls-button">&gt; Play</button>
+									<button className="controls-button">&gt;&gt; Step</button>
+								</div>
+								<div className="controls-row">
+									<button className="controls-button">|| Pause</button>
+									<button className="controls-button">&lt;&lt; Step</button>
+								</div>
+							</div>
+						)}
+					</div>
+				</div>
+
+				<div className="code-panel">
+					<pre><code>{codeSnippet}</code></pre>
+				</div>
+			</div>
+		</div>
+	);
 }
 
 export default BSTPage;
