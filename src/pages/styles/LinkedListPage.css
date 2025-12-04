@@ -370,3 +370,11 @@
 .node-deleting {
   animation: deleteNode 0.6s ease forwards;
 }
+
+.code-line {
+    transition: background 0.25s;
+}
+
+.highlight-line {
+    background: rgba(255, 230, 150, 0.6);
+}

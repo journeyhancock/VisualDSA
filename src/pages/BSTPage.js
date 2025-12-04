@@ -54,7 +54,9 @@ function BSTPage() {
 
 	// Sidebar and Actions
 	const [sidebarOpen, setSidebarOpen] = useState(false);
-	const [codeSnippet, setCodeSnippet] = useState(false);
+	const [codeSnippet, setCodeSnippet] = useState([]);
+	const [insertSnippet, setInsertSnippet] = useState([]);
+	const [deleteSnippet, setDeleteSnippet] = useState([]);
 	const [nodeSnippet, setNodeSnippet] = useState(false);
 	const [openPanels, setOpenPanels] = useState({
 		nodes: false,
@@ -73,6 +75,7 @@ function BSTPage() {
 	const [deletedKey, setDeletedKey] = useState(null);
 	const [insertedKey, setInsertedKey] = useState(null);
 	const [hoveredKey, setHoveredKey] = useState(null);
+	const [activeLine, setActiveLine] = useState(null);
 
 	// Sidebar toggles
 	const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
@@ -84,16 +87,23 @@ function BSTPage() {
 	};
 
 	useEffect(() => {
-		fetch("/code/insert_node.txt")
+		fetch("/code/BST/insert_node.txt")
 			.then((res) => res.text())
-			.then((text) => setCodeSnippet(text))
+			.then((text) => setInsertSnippet(text.split("\n")))
 			.catch((err) => console.error("Error loading code:", err));
 	}, []);
 
 	useEffect(() => {
-		fetch("/code/node.txt")
+		fetch("/code/BST/delete_node.txt")
 			.then((res) => res.text())
-			.then((text) => setNodeSnippet(text))
+			.then((text) => setDeleteSnippet(text.split("\n")))
+			.catch((err) => console.error("Error loading code:", err));
+	}, []);
+
+	useEffect(() => {
+		fetch("/code/BST/node.txt")
+			.then((res) => res.text())
+			.then((text) => setNodeSnippet(text.split("\n")))
 			.catch((err) => console.error("Error loading code:", err));
 	}, []);
 
@@ -123,6 +133,8 @@ function BSTPage() {
 	};
 
 	const handleInsert = async () => {
+		setCodeSnippet(insertSnippet.join("\n"));
+
 		const trimmedVal = insertValue.trim();
 		if (verifyInput(trimmedVal)) {
 			alert("Enter a valid integer");
@@ -140,24 +152,72 @@ function BSTPage() {
 		if (animating) return;
 		setAnimating(true);
 
-		const path = getTraversalPath(val);
-		for (let i = 0; i < path.length; i++) {
-			setHighlightedKey(path[i]);
-			await new Promise((res) => setTimeout(res, 500));
+		// Line 3: create to_insert
+		setActiveLine(3);
+		await new Promise(res => setTimeout(res, 300));
+
+		// Line 4: curr_node = root
+		setActiveLine(4);
+		await new Promise(res => setTimeout(res, 300));
+
+		// Traverse path, highlight tree nodes + code lines
+		let currNode = displayTree.current.root;
+		while (currNode) {
+			setHighlightedKey(currNode.key);
+			setActiveLine(6); // while loop
+			await new Promise(res => setTimeout(res, 450));
+
+			if (val < currNode.key) {
+				setActiveLine(7); // if (val <)
+				await new Promise(res => setTimeout(res, 300));
+
+				if (!currNode.left) {
+					// Insert left child
+					setActiveLine(8);
+					await new Promise(res => setTimeout(res, 300));
+					setActiveLine(9);
+					await new Promise(res => setTimeout(res, 300));
+					break;
+				}
+
+				setActiveLine(14); // curr = curr->left
+				currNode = currNode.left;
+			} else {
+				setActiveLine(17); // else take right path
+				await new Promise(res => setTimeout(res, 300));
+
+				if (!currNode.right) {
+					setActiveLine(18);
+					await new Promise(res => setTimeout(res, 300));
+					setActiveLine(19);
+					await new Promise(res => setTimeout(res, 300));
+					break;
+				}
+
+				setActiveLine(23); // curr = curr->right
+				currNode = currNode.right;
+			}
+
+			await new Promise(res => setTimeout(res, 450));
 		}
 
+		// Perform actual insertion
 		displayTree.current.insert(val);
 		updateNodes();
+
 		setInsertedKey(val);
+		await new Promise(res => setTimeout(res, 700));
 
-		await new Promise((res) => setTimeout(res, 800));
 		setInsertedKey(null);
-
 		setHighlightedKey(null);
+		setActiveLine(28); // return root
+
 		setAnimating(false);
 	};
 
 	const handleDelete = async () => {
+		setCodeSnippet(deleteSnippet.join("\n"));
+
 		const trimmedVal = deleteValue.trim();
 		if (verifyInput(trimmedVal)) {
 			alert("Enter a valid integer");
@@ -170,29 +230,74 @@ function BSTPage() {
 		if (animating) return;
 		setAnimating(true);
 
-		const path = getTraversalPath(val);
+		// Line 1: if (root == nullptr)
+		setActiveLine(1);
+		await new Promise(res => setTimeout(res, 300));
 
-		for (let i = 0; i < path.length; i++) {
-			setHighlightedKey(path[i]);
-			await new Promise((res) => setTimeout(res, 500));
-		}
+		const tree = displayTree.current;
+		const toDelete = tree.search ? tree.search(val) : null;
 
-		if (path.length === 0 || path[path.length - 1] !== val) {
-			setHighlightedKey(null);
+		// Line 3: to_delete = search(...)
+		setActiveLine(3);
+		await new Promise(res => setTimeout(res, 350));
+
+		if (!toDelete) {
+			setActiveLine(4); // not found
+			await new Promise(res => setTimeout(res, 350));
+			alert("Value not found.");
 			setAnimating(false);
-			alert("Value not found in tree.");
 			return;
 		}
 
-		setDeletedKey(val);
-		await new Promise((res) => setTimeout(res, 700));
+		// CASE 1 — leaf node
+		if (!toDelete.left && !toDelete.right) {
+			setActiveLine(6);
+			setHighlightedKey(toDelete.key);
+			await new Promise(res => setTimeout(res, 600));
 
-		displayTree.current.treeDelete(val);
+			setActiveLine(14); // return root
+			tree.treeDelete(val);
+			updateNodes();
+
+			await new Promise(res => setTimeout(res, 500));
+			setHighlightedKey(null);
+			setAnimating(false);
+			return;
+		}
+
+		// CASE 2 — one child
+		if (!toDelete.left || !toDelete.right) {
+			setActiveLine(17);
+			setHighlightedKey(toDelete.key);
+			await new Promise(res => setTimeout(res, 600));
+
+			setActiveLine(31); // return root
+			tree.treeDelete(val);
+			updateNodes();
+
+			await new Promise(res => setTimeout(res, 500));
+			setHighlightedKey(null);
+			setAnimating(false);
+			return;
+		}
+
+		// CASE 3 — two children
+		setActiveLine(34); // find successor
+		await new Promise(res => setTimeout(res, 400));
+
+		const succ = tree.findSuccessor(val);
+		if (succ) {
+			setActiveLine(36);
+			setHighlightedKey(succ.key);
+			await new Promise(res => setTimeout(res, 500));
+		}
+
+		tree.treeDelete(val);
 		updateNodes();
 
-		await new Promise((res) => setTimeout(res, 600));
+		setActiveLine(51); // return root
+		await new Promise(res => setTimeout(res, 400));
 
-		setDeletedKey(null);
 		setHighlightedKey(null);
 		setAnimating(false);
 	};
@@ -452,7 +557,18 @@ function BSTPage() {
 				</div>
 
 				<div className="code-panel">
-					<pre><code>{codeSnippet}</code></pre>
+					<pre>
+						{String(codeSnippet)
+							.split("\n")
+							.map((line, i) => (
+								<div
+									key={i}
+									className={`code-line ${activeLine === i ? "highlight-line" : ""}`}
+								>
+									{line}
+								</div>
+						))}
+					</pre>
 				</div>
 			</div>
 		</div>

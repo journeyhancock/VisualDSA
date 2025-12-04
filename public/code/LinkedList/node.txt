@@ -1,4 +1,4 @@
 Node* node_one {
     int value = 1;
-    Node * next = node_two;
+    Node* next = node_two;
 }

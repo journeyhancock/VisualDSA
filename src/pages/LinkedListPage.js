@@ -44,7 +44,9 @@ function LinkedListPage() {
 
     /* Sidebar and Actions */
     const [sidebarOpen, setSidebarOpen] = useState(false);
-    const [codeSnippet, setCodeSnippet] = useState(false);
+    const [codeSnippet, setCodeSnippet] = useState([]);
+    const [insertSnippet, setInsertSnippet] = useState([]);
+    const [deleteSnippet, setDeleteSnippet] = useState([]);
     const [nodeSnippet, setNodeSnippet] = useState(false);
     const [openPanels, setOpenPanels] = useState({
         nodes: false,
@@ -67,17 +69,25 @@ function LinkedListPage() {
     };
 
     const [animating, setAnimating] = useState(false);
+    const [activeLine, setActiveLine] = useState(null);
 
     // Get sample display code
     useEffect(() => {
-        fetch("/code/insert_node.txt")
+        fetch("/code/LinkedList/insert_node.txt")
             .then((res) => res.text())
-            .then((text) => setCodeSnippet(text))
+            .then((text) => setInsertSnippet(text.split("\n")))
             .catch((err) => console.error("Error loading code:", err));
     }, []);
 
     useEffect(() => {
-        fetch("/code/node.txt")
+        fetch("/code/LinkedList/delete_node.txt")
+            .then((res) => res.text())
+            .then((text) => setDeleteSnippet(text.split("\n")))
+            .catch((err) => console.error("Error loading code:", err));
+    }, []);
+
+    useEffect(() => {
+        fetch("/code/LinkedList/node.txt")
             .then((res) => res.text())
             .then((text) => setNodeSnippet(text))
             .catch((err) => console.error("Error loading code:", err));
@@ -98,6 +108,8 @@ function LinkedListPage() {
 
     // Handle the actions menu actions and live display editing
     const handleInsert = () => {
+        setCodeSnippet(insertSnippet);
+
         const trimmedVal = insertValue.trim();
         if (verifyInput(trimmedVal)) {
             alert("Enter a valid integer");
@@ -107,19 +119,38 @@ function LinkedListPage() {
         const val = Number(trimmedVal);
         setInsertValue("");
 
-        // Show new node animation
         setAnimating(true);
-        setNodes((prev) => [{ value: val, animClass: "node-inserting" }, ...prev.map(v => ({ value: v, animClass: "" }))]);
 
-        // After animation ends, update actual data
+        // 1: Node* to_insert = new Node(val);
+        setActiveLine(1);
+
+        setNodes(prev => [
+            { value: val, animClass: "node-inserting" },
+            ...prev.map(n => ({ value: n.value ?? n, animClass: "" }))
+        ]);
+
+        // 3: to_insert->next = head;
         setTimeout(() => {
+            setActiveLine(3);
+        }, 250);
+
+        // 5: head = to_insert;
+        setTimeout(() => {
+            setActiveLine(5);
             displayList.current.insert(val);
             updateNodes();
+        }, 500);
+
+        // 7: return head;
+        setTimeout(() => {
+            setActiveLine(7);
             setAnimating(false);
-        }, 800);
+        }, 750);
     };
 
     const handleDelete = () => {
+        setCodeSnippet(deleteSnippet);
+
         const trimmedVal = deleteValue.trim();
         if (verifyInput(trimmedVal)) {
             alert("Enter a valid integer");
@@ -133,51 +164,93 @@ function LinkedListPage() {
         const currentNodes = [...nodes];
         let i = 0;
 
-        setNodes((prev) =>
+        // Start of function
+        setActiveLine(1); // if (head == nullptr)
+
+        // Highlight head node first
+        setNodes(prev =>
             prev.map((v, idx) => ({
                 value: v.value ?? v,
-                animClass: idx === i ? "node-highlight" : "",
-            })) 
+                animClass: idx === 0 ? "node-highlight" : ""
+            }))
         );
 
-        const highlightInterval = setInterval(() => {
+        let interval = setInterval(() => {
+
+            // Check head match — line 3
+            if (i === 0) setActiveLine(3);
+
             const nodeValue = currentNodes[i].value ?? currentNodes[i];
 
-            if (nodeValue === val) {
-                clearInterval(highlightInterval);
+            // HEAD CASE
+            if (i === 0 && nodeValue === val) {
+                clearInterval(interval);
+
+                // Highlight deletion block
+                setActiveLine(4); // new_head = head->next
+
+                setTimeout(() => setActiveLine(5), 250); // delete head
+                setTimeout(() => setActiveLine(6), 500); // return new_head
 
                 setTimeout(() => {
-                    setNodes((prev) =>
-                    prev.map((v, idx) =>
-                        idx === i
-                        ? { value: v.value ?? v, animClass: "node-deleting" }
-                        : v
-                    )
-                    );
-                }, 400);
+                    displayList.current.listDelete(val);
+                    updateNodes();
+                    setAnimating(false);
+                }, 800);
+
+                return;
+            }
+
+            // AFTER HEAD → set prev/curr
+            if (i === 0) {
+                setActiveLine(9);  // prev = head
+                setTimeout(() => setActiveLine(10), 250); // curr = head->next
+            }
+
+            // Traverse loop
+            setActiveLine(12); // while (curr != nullptr)
+
+            // MATCH INSIDE LOOP
+            if (nodeValue === val) {
+                clearInterval(interval);
+
+                setActiveLine(13); // if (curr->val == val)
+
+                setTimeout(() => setActiveLine(14), 250); // prev->next = next
+                setTimeout(() => setActiveLine(15), 500); // delete curr
+                setTimeout(() => setActiveLine(16), 750); // return head
 
                 setTimeout(() => {
                     displayList.current.listDelete(val);
                     updateNodes();
                     setAnimating(false);
                 }, 1000);
-            } else {
-                i++;
-                if (i >= currentNodes.length) {
-                    clearInterval(highlightInterval);
-                    setAnimating(false);
-                    return;
-                }
 
-                // Highlight the next node
-                setNodes((prev) =>
-                    prev.map((v, idx) => ({
-                    value: v.value ?? v,
-                    animClass: idx === i ? "node-highlight" : "",
-                    }))
-                );
+                return;
             }
-        }, 600);
+
+            // Move forward (no match)
+            i++;
+
+            if (i >= currentNodes.length) {
+                clearInterval(interval);
+                setActiveLine(23); // return head (no deletion)
+                setAnimating(false);
+                return;
+            }
+
+            setActiveLine(19);  // prev = curr
+            setTimeout(() => setActiveLine(20), 250); // curr = curr->next
+
+            // Advance highlight
+            setNodes(prev =>
+                prev.map((v, idx) => ({
+                    value: v.value ?? v,
+                    animClass: idx === i ? "node-highlight" : ""
+                }))
+            );
+
+        }, 700);
     };
 
     const handleEdit = (index, newVal) => {
@@ -343,7 +416,16 @@ function LinkedListPage() {
 
                 {/* Code */}
                 <div className="code-panel">
-                    <pre><code>{codeSnippet}</code></pre>
+                    <pre>
+                        {codeSnippet.map((line, i) => (
+                            <div 
+                                key={i}
+                                className={`code-line ${activeLine === i ? "highlight-line" : ""}`}
+                            >
+                                {line}
+                            </div>
+                        ))}
+                    </pre>
                 </div>
             </div>
         </div>

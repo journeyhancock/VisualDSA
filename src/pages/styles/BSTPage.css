@@ -321,3 +321,11 @@
   outline: none !important;
   box-shadow: none !important;
 }
+
+.code-line {
+    padding: 2px 6px;
+    transition: background 0.2s ease;
+}
+.highlight-line {
+    background: rgba(255, 230, 150, 0.65);
+}

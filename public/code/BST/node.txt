@@ -1,0 +1,6 @@
+Node* node_one {
+    int value = 1;
+    Node* left = node_two;
+    Node* right = node_three;
+    Node* parent = nullptr;
+}
