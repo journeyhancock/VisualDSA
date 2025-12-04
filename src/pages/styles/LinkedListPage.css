@@ -126,22 +126,60 @@
 }
 
 .node-box {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 50px;
-    height: 50px;
-    background-color: #13171D;
-    border: 2px solid #2D333B;
-    border-radius: 6px;
-    color: #F0F6FC;
-    font-size: 18;
-    transform: scale(1.1);
-    transition: all 0.3s ease;
+  display: inline-flex;               
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  background-color: #13171D;
+  border: 2px solid #2D333B;
+  border-radius: 6px;
+  color: #F0F6FC;
+  font-size: 18px;
+  box-sizing: border-box;
+  transform-origin: center center;
+  transform: scale(1);
+  transition: transform 0.18s ease, background-color 0.18s ease, color 0.18s ease;
+}
+
+.node-inserting.node-highlight,
+.node-deleting.node-highlight {
+    transform: scale(1.18) !important;
 }
 
 .node-box:hover {
-    transform: scale(1.15)
+  transform: scale(1.18);
+}
+
+@keyframes insertNode {
+  0% { opacity: 0; transform: scale(0.6); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.node-inserting {
+  animation: insertNode 0.7s ease-out forwards;
+}
+
+@keyframes deleteNode {
+  0% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.5); }
+}
+
+.node-deleting {
+  animation: deleteNode 0.6s ease forwards;
+}
+
+.node-highlight {
+  background-color: #ffcc00 !important;
+  color: #0D1117 !important;
+  transform: scale(1.12) !important;
+  box-shadow: 0 6px 18px rgba(255,204,0,0.08);
+  transition: transform 0.12s ease, background-color 0.12s ease;
+}
+
+
+.node-box:hover {
+    transform: scale(1.12);
 }
 
 .node-input {

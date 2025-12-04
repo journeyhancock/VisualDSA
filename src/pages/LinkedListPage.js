@@ -70,6 +70,7 @@ function LinkedListPage() {
 
     const [animating, setAnimating] = useState(false);
     const [activeLine, setActiveLine] = useState(null);
+    const [activeNodeIndex, setActiveNodeIndex] = useState(null);
 
     // Get sample display code
     useEffect(() => {
@@ -119,6 +120,7 @@ function LinkedListPage() {
         const val = Number(trimmedVal);
         setInsertValue("");
 
+        setActiveNodeIndex(0);
         setAnimating(true);
 
         // 1: Node* to_insert = new Node(val);
@@ -145,6 +147,7 @@ function LinkedListPage() {
         setTimeout(() => {
             setActiveLine(7);
             setAnimating(false);
+            setActiveNodeIndex(null);
         }, 750);
     };
 
@@ -168,14 +171,10 @@ function LinkedListPage() {
         setActiveLine(1); // if (head == nullptr)
 
         // Highlight head node first
-        setNodes(prev =>
-            prev.map((v, idx) => ({
-                value: v.value ?? v,
-                animClass: idx === 0 ? "node-highlight" : ""
-            }))
-        );
+        setActiveNodeIndex(0);
 
         let interval = setInterval(() => {
+            setActiveNodeIndex(i);
 
             // Check head match — line 3
             if (i === 0) setActiveLine(3);
@@ -196,6 +195,7 @@ function LinkedListPage() {
                     displayList.current.listDelete(val);
                     updateNodes();
                     setAnimating(false);
+                    setActiveNodeIndex(null);
                 }, 800);
 
                 return;
@@ -224,6 +224,7 @@ function LinkedListPage() {
                     displayList.current.listDelete(val);
                     updateNodes();
                     setAnimating(false);
+                    setActiveNodeIndex(null);
                 }, 1000);
 
                 return;
@@ -241,15 +242,6 @@ function LinkedListPage() {
 
             setActiveLine(19);  // prev = curr
             setTimeout(() => setActiveLine(20), 250); // curr = curr->next
-
-            // Advance highlight
-            setNodes(prev =>
-                prev.map((v, idx) => ({
-                    value: v.value ?? v,
-                    animClass: idx === i ? "node-highlight" : ""
-                }))
-            );
-
         }, 700);
     };
 
@@ -325,7 +317,10 @@ function LinkedListPage() {
                         return (
                             <React.Fragment key={index}>
                             <div
-                                className={`node-box ${node.animClass || ""}`}
+                                className={`node-box 
+                                    ${node.animClass || ""} 
+                                    ${activeNodeIndex === index ? "node-highlight" : ""}
+                                `}
                                 contentEditable={editingIndex === index}
                                 suppressContentEditableWarning
                                 onClick={() => handleClick(index)}
