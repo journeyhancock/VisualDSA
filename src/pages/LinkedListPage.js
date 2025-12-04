@@ -53,6 +53,8 @@ function LinkedListPage() {
         actions: false,
         controls: false,
     });
+    const [selectedNodeRef, setSelectedNodeRef] = useState(null);
+    const [selectedNodeCode, setSelectedNodeCode] = useState("");
 
     /* Live Display Editing */
     const [insertValue, setInsertValue] = useState("");
@@ -105,7 +107,33 @@ function LinkedListPage() {
     }, []);
 
     // Update nodes with the current display 
-    const updateNodes = () => setNodes(displayList.current.toArray());
+    const updateNodes = () => {
+        const arr = displayList.current.toArray();
+        setNodes(arr);
+
+        // Selected node exists?
+        if (selectedNodeRef) {
+
+            // Check if this node is still in the linked list
+            let stillExists = false;
+            let curr = displayList.current.head;
+            while (curr) {
+                if (curr === selectedNodeRef) {
+                    stillExists = true;
+                    break;
+                }
+                curr = curr.next;
+            }
+
+            if (stillExists) {
+                setSelectedNodeCode(generateNodeCode(selectedNodeRef));
+            } else {
+                // Node was deleted → show "null" placeholder
+                setSelectedNodeCode(generateNodeCode(null));
+                setSelectedNodeRef(null);
+            }
+        }
+    };
 
     // Handle the actions menu actions and live display editing
     const handleInsert = () => {
@@ -245,6 +273,28 @@ function LinkedListPage() {
         }, 700);
     };
 
+    const generateNodeCode = (nodeObj) => {
+        // If node was deleted or missing
+        if (!nodeObj) {
+            return (
+    `Node* node {
+        int value = null;
+        Node* next = null;
+    }`
+            );
+        }
+
+        const id = nodeObj.id ?? "?";
+        const nextId = nodeObj.next ? (nodeObj.next.id ?? "?") : null;
+
+        return (
+    `Node* node_${id} {
+        int value = ${nodeObj.key};
+        Node* next = ${nextId !== null ? `node_${nextId}` : "nullptr"};
+    }`
+        );
+    };
+
     const handleEdit = (index, newVal) => {
         newVal = newVal.trim();
 
@@ -253,8 +303,11 @@ function LinkedListPage() {
 
         temp_node.key = Number(newVal);
         updateNodes();
-    }
 
+        if (selectedNodeRef && temp_node === selectedNodeRef) {
+            setSelectedNodeCode(generateNodeCode(temp_node));
+        }
+    };
 
     const handleBlur = (e, index) => {
         let newVal = e.target.textContent;
@@ -281,7 +334,12 @@ function LinkedListPage() {
 
     const handleClick = (index) => {
         setEditingIndex(index);
-    }
+
+        const arr = displayList.current.toArrayObjects(); 
+        const clickedNodeObj = arr[index];
+        setSelectedNodeRef(clickedNodeObj);
+        setSelectedNodeCode(generateNodeCode(clickedNodeObj));
+    };
 
     const handleMouseEnter = (index) => {
         setEditingIndex(index);
@@ -349,7 +407,9 @@ function LinkedListPage() {
                         {openPanels.nodes && (
                             <div className="panel-body nodes-body">
                                 <div className="code-panel small">
-                                    <pre><code>{nodeSnippet}</code></pre>
+                                    <pre><code>
+                                        {selectedNodeCode !== "" ? selectedNodeCode : nodeSnippet}
+                                    </code></pre>
                                 </div>
                             </div>
                         )}

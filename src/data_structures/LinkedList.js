@@ -1,8 +1,13 @@
 class Node {
+    static nextId = 0;
+    
     constructor() {
         this.next = null;
         this.key = null;
+        this._id = Node.nextId++;
     }
+
+    get id() { return this._id; }
 };
 
 class LinkedList {
@@ -91,6 +96,16 @@ class LinkedList {
         }
 
         return nodes;
+    }
+
+    toArrayObjects = function() {
+        const result = [];
+        let curr = this.head;
+        while (curr) {
+            result.push(curr);  // push the node object
+            curr = curr.next;
+        }
+        return result;
     }
 };
 

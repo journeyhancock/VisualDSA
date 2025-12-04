@@ -63,6 +63,9 @@ function BSTPage() {
 		actions: false,
 		controls: false,
 	});
+	const [selectedKey, setSelectedKey] = useState(null);
+	const [selectedNodeCode, setSelectedNodeCode] = useState("");
+	const [skipReselect, setSkipReselect] = useState(false);
 
 	// Live Display Editing
 	const [insertValue, setInsertValue] = useState("");
@@ -118,7 +121,56 @@ function BSTPage() {
 		setNodes(tree.toArray());
 	}, []);
 
-	const updateNodes = () => setNodes(displayTree.current.toArray());
+	const updateNodes = () => {
+		const arr = displayTree.current.toArray();
+		setNodes(arr);
+
+		if (skipReselect) {
+			setSkipReselect(false);
+			return;
+		}
+
+		if (selectedKey !== null) {
+			const stillExists = !!displayTree.current.search(selectedKey);
+
+			if (stillExists) {
+				const nodeObj = displayTree.current.search(selectedKey);
+				setSelectedNodeCode(generateNodeCode(nodeObj));
+			} else {
+				setSelectedKey(null);
+				setSelectedNodeCode(generateNodeCode(null));
+			}
+		}
+	};
+
+	const formatBlock = (str) => str.trim().split("\n").map(line => line.trimEnd()).join("\n");
+
+	const generateNodeCode = (nodeObj) => {
+		if (!nodeObj) {
+			return formatBlock(
+	`Node* node {
+		int value = null;
+		Node* left = null;
+		Node* right = null;
+		Node* parent = null;
+	}`
+			);
+		}
+
+		const id = nodeObj._id;
+		const leftId = nodeObj.left ? nodeObj.left._id : null;
+		const rightId = nodeObj.right ? nodeObj.right._id : null;
+		const parentId = nodeObj.parent ? nodeObj.parent._id : null;
+
+		return formatBlock(
+	`Node* node_${id} {
+		int value = ${nodeObj.key};
+		Node* left = ${leftId !== null ? `node_${leftId}` : "nullptr"};
+		Node* right = ${rightId !== null ? `node_${rightId}` : "nullptr"};
+		Node* parent = ${parentId !== null ? `node_${parentId}` : "nullptr"};
+	}`
+		);
+	};
 
 	const getTraversalPath = (val) => {
 		const path = [];
@@ -236,6 +288,10 @@ function BSTPage() {
 
 		const tree = displayTree.current;
 		const toDelete = tree.search ? tree.search(val) : null;
+		if (selectedKey === val) {
+			setSelectedKey(null);
+			setSelectedNodeCode(generateNodeCode(null));
+		}
 
 		// Line 3: to_delete = search(...)
 		setActiveLine(3);
@@ -363,11 +419,16 @@ function BSTPage() {
 
 	const handleClick = (key) => {
 		if (animating) return;
-		setEditingIndex(key);
 
+		setSelectedKey(key);
+		const realNode = displayTree.current.search(key);
+		setSelectedNodeCode(generateNodeCode(realNode));
+
+		setEditingIndex(key);
+		
 		setTimeout(() => {
-				const el = document.querySelector(`.tree-node[data-key='${key}']`);
-				if (el) {
+			const el = document.querySelector(`.tree-node[data-key='${key}']`);
+			if (el) {
 				el.setAttribute("contenteditable", "true");
 				el.focus();
 
@@ -377,9 +438,9 @@ function BSTPage() {
 				range.collapse(false);
 				sel.removeAllRanges();
 				sel.addRange(range);
-				}
+			}
 		}, 0);
-};
+	};
 
 	const handleMouseEnter = (key) => {
 		setHoveredKey(key);
@@ -496,7 +557,9 @@ function BSTPage() {
 						{openPanels.nodes && (
 							<div className="panel-body nodes-body">
 								<div className="code-panel small">
-									<pre><code>{nodeSnippet}</code></pre>
+									<pre><code>
+									{selectedNodeCode !== "" ? selectedNodeCode : nodeSnippet.join("\n")}
+									</code></pre>
 								</div>
 							</div>
 						)}

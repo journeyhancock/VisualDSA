@@ -1,4 +1,4 @@
-Node* node_one {
-    int value = 1;
-    Node* next = node_two;
+Node* node_NUM {
+    int value = X;
+    Node* next = node_NUM;
 }

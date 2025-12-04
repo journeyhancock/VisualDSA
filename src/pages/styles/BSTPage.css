@@ -248,7 +248,8 @@
   padding: 1.5rem;
   font-family: "Courier New", monospace;
   font-size: 14px;
-  white-space: pre;
+  white-space: pre-wrap;
+  tab-size: 4;
   color: #F0F6FC;
   overflow-x: hidden;
   overflow-y: auto;

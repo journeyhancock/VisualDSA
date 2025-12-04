@@ -1,9 +1,11 @@
 class Node {
+    static nextId = 0;
     constructor() {
         this.parent = null;
         this.left = null;
         this.right = null;
         this.key = null;
+        this._id = Node.nextId++;
     }
 }
 
