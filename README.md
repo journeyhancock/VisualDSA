@@ -1,1 +1,1 @@
-This is to help Data Structure and Algorithms students visually learn and understand important data structures and algorithms. To eventually be hosted at [VisualDSA.study](https://VisualDSA.study).
+This is to help Data Structure and Algorithms students visually learn and understand important data structures and algorithms. Hosted at [visual-dsa-virid.vercel.app](https://visual-dsa-virid.vercel.app/).
