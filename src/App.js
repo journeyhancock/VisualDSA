@@ -15,8 +15,6 @@ function Sidebar({isOpen, toggleSidebar}) {
   return (
     <div className={`sidebar ${isOpen ? "open" : ''}`}>
       <div className="sidebar-list">
-        <h3>New Canvas</h3>
-
         <h3>Visualize</h3>
         <ul>
           <li><Link to="/linkedlist" onClick={toggleSidebar}>Linked List</Link></li>
@@ -29,30 +27,18 @@ function Sidebar({isOpen, toggleSidebar}) {
           <li><Link to="/quiz/bst" onClick={toggleSidebar}>Binary Search Tree</Link></li>
         </ul>
 
-        <h3>Code</h3>
-        <ul>
-          <li><Link to="/code" onClick={toggleSidebar}>Linked List</Link></li>
-          <li><Link to="/code" onClick={toggleSidebar}>Binary Search Tree</Link></li>
-        </ul>
       </div>
     </div>
   )
 }
 
-function Home({toggleSidebar}) {
+function Home() {
   return (
     <div className="App">
       {/* Banner Header */}
       <header className="header">
         <img src={headerBanner} alt="VisualDSA" className="header-banner" />
       </header>
-
-      {/* Hamburger Sidebar */}
-      <div className="hamburger" onClick={toggleSidebar}>
-        <div className="bar"></div>
-        <div className="bar"></div>
-        <div className="bar"></div>
-      </div>
 
       {/* Module Grid */}
       <div className="modules">
@@ -70,10 +56,6 @@ function Home({toggleSidebar}) {
           </div>
         </Link>
 
-        <div className="module">
-          <h2 className="module-title">Name</h2>
-          {/* <img src={linkedListImg} alt="name" className="module-image" /> */}
-        </div>
       </div>
     </div>
   );
@@ -86,8 +68,13 @@ function App() {
   return (
     <Router>
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+      <div className="hamburger" onClick={toggleSidebar}>
+        <div className="bar"></div>
+        <div className="bar"></div>
+        <div className="bar"></div>
+      </div>
       <Routes>
-        <Route path="/" element={<Home toggleSidebar={toggleSidebar} />} />
+        <Route path="/" element={<Home />} />
         <Route path="/linkedlist" element={<LinkedListPage />} />
         <Route path="/bst" element={<BSTPage />} />
         <Route path="/quiz/linkedlist" element={<LinkedListQuizPage />} />

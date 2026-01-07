@@ -9,42 +9,7 @@ function verifyInput(value) {
 	return (!Number.isInteger(Number(value)) || value === "" || value.includes("."));
 }
 
-function Sidebar({ isOpen, toggleSidebar }) {
-	return (
-		<div className={`sidebar ${isOpen ? "open" : ""}`}>
-			<div className="sidebar-list">
-				<h3>New Canvas</h3>
-				<h3>Visualize</h3>
-				<ul>
-					<li>
-						<Link to="/linkedlist" onClick={toggleSidebar}>Linked List</Link>
-					</li>
-					<li>
-						<Link to="/bst" onClick={toggleSidebar}>Binary Search Tree</Link>
-					</li>
-				</ul>
-				<h3>Quiz</h3>
-				<ul>
-					<li>
-						<Link to="/quiz/linkedlist" onClick={toggleSidebar}>Linked List</Link>
-					</li>
-					<li>
-						<Link to="/quiz/bst" onClick={toggleSidebar}>Binary Search Tree</Link>
-					</li>
-				</ul>
-				<h3>Code</h3>
-				<ul>
-					<li>
-						<Link to="/code" onClick={toggleSidebar}>Linked List</Link>
-					</li>
-					<li>
-						<Link to="/code" onClick={toggleSidebar}>Binary Search Tree</Link>
-					</li>
-				</ul>
-			</div>
-		</div>
-	);
-}
+
 
 function BSTPage() {
 	// Tree Display
@@ -52,8 +17,7 @@ function BSTPage() {
 	const initialized = useRef(false);
 	const [nodes, setNodes] = useState(displayTree.current.toArray());
 
-	// Sidebar and Actions
-	const [sidebarOpen, setSidebarOpen] = useState(false);
+	// Actions and state
 	const [codeSnippet, setCodeSnippet] = useState([]);
 	const [insertSnippet, setInsertSnippet] = useState([]);
 	const [deleteSnippet, setDeleteSnippet] = useState([]);
@@ -80,8 +44,6 @@ function BSTPage() {
 	const [hoveredKey, setHoveredKey] = useState(null);
 	const [activeLine, setActiveLine] = useState(null);
 
-	// Sidebar toggles
-	const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 	const togglePanel = (panel) => {
 		setOpenPanels((prev) => ({
 			...prev,
@@ -509,15 +471,6 @@ function BSTPage() {
 
 	return (
 		<div className="bst-page">
-			{/* Sidebar */}
-			<Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
-
-			{/* Hamburger */}
-			<div className="hamburger" onClick={toggleSidebar}>
-				<div className="bar"></div>
-				<div className="bar"></div>
-				<div className="bar"></div>
-			</div>
 
 			<h1 className="page-title">Binary Search Tree</h1>
 
@@ -598,7 +551,7 @@ function BSTPage() {
 						)}
 					</div>
 
-					<div className="panel controls-panel">
+					{/* <div className="panel controls-panel">
 						<div className="panel-header" onClick={() => togglePanel("controls")}>
 							<div className={`triangle-icon ${openPanels.controls ? "open" : ""}`}></div>
 							<h3>Controls</h3>
@@ -616,7 +569,7 @@ function BSTPage() {
 								</div>
 							</div>
 						)}
-					</div>
+					</div> */}
 				</div>
 
 				<div className="code-panel">

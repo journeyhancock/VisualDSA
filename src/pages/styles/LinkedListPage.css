@@ -4,7 +4,7 @@
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    font-family: "Grold Bold", Arial, sans-serif;
+    font-family: "Montserrat", Arial, sans-serif;
     position: relative;
     overflow-x: hidden;
     margin: 0;
@@ -21,71 +21,7 @@
     padding: 1rem 0;
 }
 
-/* Hambuger Button */
-.hamburger {
-  position: fixed;
-  top: 20px;
-  left: 25px;
-  cursor: pointer;
-  z-index: 1001;
-}
 
-.hamburger .bar {
-  width: 28px;
-  height: 3px;
-  background-color: #13171D;
-  border: 1px solid #2D333B;
-  margin: 5px 0;
-  transition: 0.4s;
-}
-
-/* Sidebar Menu */
-.sidebar {
-  position: fixed;
-  top: 0;
-  left: -300px;
-  width: 250px;
-  height: 100%;
-  background-color: #13171D;
-  color: #F0F6FC;
-  transition: left 0.3s ease;
-  z-index: 1000;
-  padding: 60px 20px 20px 30px;
-}
-
-.sidebar.open {
-  left: 0;
-}
-
-.sidebar-content {
-  padding: 20px;
-}
-
-.sidebar h3 {
-  font-size: 16px;
-  margin-bottom: 8px;
-  color: #F0F6FC;
-}
-
-.sidebar ul {
-  list-style: none;
-  padding-left: 35px;
-  margin-bottom: 20px;
-}
-
-.sidebar ul li {
-  margin: 5px 0;
-}
-
-.sidebar ul li a {
-  color: #F0F6FC;
-  text-decoration: none;
-  font-size: 15px;
-}
-
-.sidebar ul li a:hover {
-  color: #F0F6FC;
-}
 
 .page-title {
     text-align: center;

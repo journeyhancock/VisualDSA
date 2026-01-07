@@ -4,37 +4,11 @@ import { BST, Node } from "../data_structures/BST";
 import "../App.css";
 import "./styles/BSTQuizPage.css";
 
-function Sidebar({ isOpen, toggleSidebar }) {
-    return (
-        <div className={`sidebar ${isOpen ? "open" : ""}`}>
-            <div className="sidebar-list">
-                <h3>Visualize</h3>
-                <ul>
-                    <li>
-                        <Link to="/linkedlist" onClick={toggleSidebar}>Linked List</Link>
-                    </li>
-                    <li>
-                        <Link to="/bst" onClick={toggleSidebar}>Binary Search Tree</Link>
-                    </li>
-                </ul>
-                <h3>Quiz</h3>
-                <ul>
-                    <li>
-                        <Link to="/quiz/linkedlist" onClick={toggleSidebar}>Linked List</Link>
-                    </li>
-                    <li>
-                        <Link to="/quiz/bst" onClick={toggleSidebar}>Binary Search Tree</Link>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    );
-}
+
 
 function BSTQuizPage() {
     const bstRef = useRef(new BST());
     const [nodesArr, setNodesArr] = useState([]);
-    const [sidebarOpen, setSidebarOpen] = useState(false);
     const [openPanels, setOpenPanels] = useState({ textInput: false, insert: false, delete: false });
 
     const [textInput, setTextInput] = useState("");
@@ -47,7 +21,6 @@ function BSTQuizPage() {
     const [isCorrect, setIsCorrect] = useState(false);
     const nodesRefs = useRef([]);
 
-    const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
     const togglePanel = (p) => setOpenPanels(prev => ({ ...prev, [p]: !prev[p] }));
 
     const rebuildFromArray = (arr) => {
@@ -273,12 +246,6 @@ function BSTQuizPage() {
 
     return (
         <div className="quiz-page">
-            <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
-            <div className="hamburger" onClick={toggleSidebar}>
-                <div className="bar"></div>
-                <div className="bar"></div>
-                <div className="bar"></div>
-            </div>
 
             <h1 className="page-title">Binary Search Tree Quiz</h1>
             <Link to="/" className="back-icon">
@@ -305,6 +272,8 @@ function BSTQuizPage() {
                     </div>
 
                     <div className="visual-edits">
+                        <div className="inorder-header">In-order display</div>
+                        
                         <div className="node-container">
                             {nodesArr.map((v, i) => (
                                 <div

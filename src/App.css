@@ -1,8 +1,8 @@
 @font-face {
-  font-family: "Grold Bold";
-  src: url('./assets/fonts/GroldBold.otf') format('truetype');
+  font-family: "Montserrat";
+  src: url('./assets/fonts/montserrat.otf') format('truetype');
 }
-/* Font Credit: https://www.fontspring.com/fonts/typesketchbook/grold */
+/* Font Credit: https://www.1001fonts.com/montserrat-font.html */
 
 body {
   margin: 0;
@@ -38,6 +38,15 @@ body {
 }
 
 /* Sidebar Menu */
+.sidebar h3 {
+  font-weight: 800;
+}
+
+.sidebar a,
+.sidebar li {
+  font-weight: 600;
+}
+
 .sidebar {
   position: fixed;
   top: 0;

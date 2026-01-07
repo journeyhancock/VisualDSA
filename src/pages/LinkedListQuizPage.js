@@ -8,29 +8,11 @@ function verifyInput(value) {
     return !Number.isInteger(Number(value)) || value === "" || value.includes(".");
 }
 
-function Sidebar({ isOpen, toggleSidebar }) {
-    return (
-        <div className={`sidebar ${isOpen ? "open" : ""}`}>
-            <div className="sidebar-list">
-                <h3>Visualize</h3>
-                <ul>
-                    <li><Link to="/linkedlist" onClick={toggleSidebar}>Linked List</Link></li>
-                    <li><Link to="/bst" onClick={toggleSidebar}>Binary Search Tree</Link></li>
-                </ul>
-                <h3>Quiz</h3>
-                <ul>
-                    <li><Link to="/quiz/linkedlist" onClick={toggleSidebar}>Linked List</Link></li>
-                    <li><Link to="/quiz/bst" onClick={toggleSidebar}>Binary Search Tree</Link></li>
-                </ul>
-            </div>
-        </div>
-    );
-}
+
 
 function LinkedListQuizPage() {
     const displayList = useRef(new LinkedList());
     const [nodes, setNodes] = useState([]);
-    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     const [insertPos, setInsertPos] = useState("");
     const [insertVal, setInsertVal] = useState("");
@@ -62,8 +44,6 @@ function LinkedListQuizPage() {
             sel.addRange(range);
         }
     }, [editingIndex]);
-
-    const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
     const togglePanel = (panel) => {
         setOpenPanels((prev) => ({
@@ -208,12 +188,6 @@ function LinkedListQuizPage() {
 
     return (
         <div className="quiz-page">
-            <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
-            <div className="hamburger" onClick={toggleSidebar}>
-                <div className="bar"></div>
-                <div className="bar"></div>
-                <div className="bar"></div>
-            </div>
 
             <h1 className="page-title">Linked List Quiz</h1>
             <Link to="/" className="back-icon">

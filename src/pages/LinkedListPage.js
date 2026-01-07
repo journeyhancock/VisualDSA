@@ -8,42 +8,13 @@ function verifyInput(value) {
     return (!Number.isInteger(Number(value)) || value === "" || value.includes("."))
 }
 
-function Sidebar({isOpen, toggleSidebar}) {
-  return (
-    <div className={`sidebar ${isOpen ? "open" : ''}`}>
-      <div className="sidebar-list">
-        <h3>New Canvas</h3>
-
-        <h3>Visualize</h3>
-        <ul>
-          <li><Link to="/linkedlist" onClick={toggleSidebar}>Linked List</Link></li>
-          <li><Link to="/bst" onClick={toggleSidebar}>Binary Search Tree</Link></li>
-        </ul>
-
-        <h3>Quiz</h3>
-        <ul>
-          <li><Link to="/quiz/linkedlist" onClick={toggleSidebar}>Linked List</Link></li>
-          <li><Link to="/quiz/bst" onClick={toggleSidebar}>Binary Search Tree</Link></li>
-        </ul>
-
-        <h3>Code</h3>
-        <ul>
-          <li><Link to="/code" onClick={toggleSidebar}>Linked List</Link></li>
-          <li><Link to="/code" onClick={toggleSidebar}>Binary Search Tree</Link></li>
-        </ul>
-      </div>
-    </div>
-  )
-}
-
 function LinkedListPage() {
     /* List Display */
     const displayList = useRef(new LinkedList());
     const initialized = useRef(false);
     const [nodes, setNodes] = useState(displayList.current.toArray());
 
-    /* Sidebar and Actions */
-    const [sidebarOpen, setSidebarOpen] = useState(false);
+    /* Actions */
     const [codeSnippet, setCodeSnippet] = useState([]);
     const [insertSnippet, setInsertSnippet] = useState([]);
     const [deleteSnippet, setDeleteSnippet] = useState([]);
@@ -61,8 +32,7 @@ function LinkedListPage() {
     const [deleteValue, setDeleteValue] = useState("");
     const [editingIndex, setEditingIndex] = useState("");
 
-    /* Sidebar toggling and Actions opening */
-    const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+    /* Actions opening */
     const togglePanel = (panel) => {
         setOpenPanels((prev) => ({
             ...prev,
@@ -347,18 +317,9 @@ function LinkedListPage() {
 
     return (
         <div className="linkedlist-page">
-            {/* Sidebar */}
-            <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar}/>
-
-            {/* Hamburger Sidebar */}
-            <div className="hamburger" onClick={toggleSidebar}>
-                <div className="bar"></div>
-                <div className="bar"></div>
-                <div className="bar"></div>
-            </div>
 
             {/* Title */}
-            <h1 className="page-title">Linked List</h1>
+            <h1 className="page-title">Linked List</h1> 
 
             {/* Return to home */}
             <Link to="/" className="back-icon">
@@ -448,7 +409,7 @@ function LinkedListPage() {
                     </div>
 
                     {/* Controls panel */}
-                    <div className="panel controls-panel">
+                    {/* <div className="panel controls-panel">
                         <div className="panel-header" onClick={() => togglePanel("controls")}>
                             <div className={`triangle-icon ${openPanels.controls ? "open" : ""}`}></div>
                             <h3>Controls</h3>
@@ -466,7 +427,7 @@ function LinkedListPage() {
                                 </div>
                             </div>
                         )}
-                    </div>
+                    </div> */}
                 </div>
 
                 {/* Code */}
