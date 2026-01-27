@@ -1,0 +1,10 @@
+int search(const vector<Node*>& table, int key) {
+  int idx = abs(key) % table.size();
+  Node* cur = table[idx];
+
+  while (cur) {
+    if (cur->key == key) return cur->value;
+    cur = cur->next;
+  }
+  return -1;
+}

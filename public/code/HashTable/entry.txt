@@ -1,0 +1,6 @@
+Entry* entry_ID {
+  int key = KEY;
+  int value = VALUE;
+  int home = HOME;
+  Entry* next = NEXT;
+}

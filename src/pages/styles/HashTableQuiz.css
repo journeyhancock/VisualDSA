@@ -1,0 +1,255 @@
+/* Base quiz page styling mirrors existing quiz pages :contentReference[oaicite:11]{index=11} */
+.quiz-page {
+  background-color: #0d1117;
+  color: #f0f6fc;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  font-family: "Montserrat", Arial, sans-serif;
+  position: relative;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+.page-title {
+  text-align: center;
+  font-size: 32px;
+  border-bottom: 1px solid #2d333b;
+  margin: 0;
+  padding: 1rem 0;
+}
+
+/* Layout: visualization + side-actions + quiz-container (BSTQuiz style) :contentReference[oaicite:12]{index=12} */
+.hashtable-quiz-content {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  height: calc(100vh - 150px);
+  padding: 0 2rem;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.visualization-area {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border-radius: 8px;
+  overflow: auto;
+}
+
+/* Bucket editor view */
+.buckets-container {
+  width: 100%;
+  max-width: 880px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 8px;
+  box-sizing: border-box;
+}
+
+.bucket-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border: 1px solid #2D333B;
+  background: #13171D;
+  border-radius: 10px;
+  padding: 10px 12px;
+  box-sizing: border-box;
+}
+
+.bucket-index {
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  background: #0D1117;
+  border: 1px solid #2D333B;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  color: #F0F6FC;
+  flex: 0 0 auto;
+}
+
+.bucket-input {
+  flex: 1;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #2d333b;
+  background: #161b22;
+  color: #f0f6fc;
+  box-sizing: border-box;
+  font-family: "Montserrat", Arial, sans-serif;
+}
+
+/* Side panels (same as other quizzes) */
+.side-actions {
+  width: 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.panel {
+  background-color: #13171d;
+  border: 1px solid #2d333b;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #2d333b;
+}
+
+.panel-header h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #f0f6fc;
+}
+
+.triangle-icon {
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 10px solid #2d333b;
+  transition: transform 0.2s ease;
+}
+
+.triangle-icon.open {
+  transform: rotate(180deg);
+}
+
+.panel-body {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.actions-body input[type="text"],
+.actions-body input[type="number"] {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #2d333b;
+  background: #161b22;
+  color: #f0f6fc;
+  box-sizing: border-box;
+}
+
+.actions-button {
+  background-color: #0d1117;
+  border: 1px solid #2d333b;
+  padding: 10px 12px;
+  border-radius: 6px;
+  color: #f0f6fc;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.actions-button:hover {
+  background-color: #161b22;
+}
+
+/* Quiz prompt panel */
+.quiz-container {
+  width: 36%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  position: relative;
+  padding-left: 2rem;
+  border-left: 1px solid #2d333b;
+}
+
+.quiz-title {
+  text-align: left;
+  color: #fff;
+  font-size: 18px;
+  margin: 1.2rem 0;
+}
+
+.quiz-navigation {
+  position: absolute;
+  bottom: 40px;
+  left: 2rem;
+  right: 2rem;
+  display: flex;
+  justify-content: space-between;
+}
+
+.quiz-button {
+  background: #1a202a;
+  border: 2px solid #2d333b;
+  border-radius: 6px;
+  color: #f0f6fc;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 8px 16px;
+  font-weight: bold;
+  transition: background 0.2s ease;
+}
+
+.quiz-button:hover {
+  background: #161b22;
+}
+
+/* Feedback overlay mirrors existing quiz overlay styling :contentReference[oaicite:13]{index=13} */
+.quiz-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 60%;
+  height: 40%;
+  transform: translate(-50%, -50%);
+  background: rgba(13, 17, 23, 0.95);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 2px solid #2d333b;
+  border-radius: 12px;
+  z-index: 1100;
+}
+
+.popup-content {
+  background-color: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  color: #f0f6fc;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.popup-content h3 {
+  font-size: 24px;
+  margin-bottom: 1rem;
+}
+
+.correct-text {
+  color: #3fb950;
+}
+
+.incorrect-text {
+  color: #f85149;
+}

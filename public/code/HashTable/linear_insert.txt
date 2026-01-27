@@ -1,0 +1,18 @@
+void insert(vector<int>& keys, vector<int>& values, int key, int val) {
+  int n = keys.size();
+  int idx = abs(key) % n;
+
+  for (int i = 0; i < n; ++i) {
+    int probe = (idx + i) % n;
+    
+    if (keys[probe] == EMPTY || keys[probe] == TOMBSTONE) {
+      keys[probe] = key;
+      values[probe] = val;
+      return;
+    }
+    if (keys[probe] == key) { // update
+      values[probe] = val;
+      return;
+    }
+  }
+}

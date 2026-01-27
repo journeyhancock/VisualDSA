@@ -3,11 +3,14 @@ import {BrowserRouter as Router, Routes, Route, Link} from 'react-router-dom';
 import headerBanner from "./assets/images/banner_text.png";
 import linkedListImg from "./assets/images/linked_list.png"
 import bstImg from "./assets/images/bst.png"
+import hashTableImg from "./assets/images/hash_table.png"
 
 import LinkedListPage from "./pages/LinkedListPage";
 import BSTPage from "./pages/BSTPage";
 import LinkedListQuizPage from "./pages/LinkedListQuizPage";
 import BSTQuizPage from './pages/BSTQuizPage';
+import HashTablePage from './pages/HashTablePage';
+import HashTableQuizPage from './pages/HashTableQuiz';
 
 import {useState} from "react";
 
@@ -19,12 +22,14 @@ function Sidebar({isOpen, toggleSidebar}) {
         <ul>
           <li><Link to="/linkedlist" onClick={toggleSidebar}>Linked List</Link></li>
           <li><Link to="/bst" onClick={toggleSidebar}>Binary Search Tree</Link></li>
+          <li><Link to="/hashtable" onClick={toggleSidebar}>Hash Table</Link></li>
         </ul>
 
         <h3>Quiz</h3>
         <ul>
           <li><Link to="/quiz/linkedlist" onClick={toggleSidebar}>Linked List</Link></li>
           <li><Link to="/quiz/bst" onClick={toggleSidebar}>Binary Search Tree</Link></li>
+          <li><Link to="/quiz/hashtable" onClick={toggleSidebar}>Hash Table</Link></li>
         </ul>
 
       </div>
@@ -56,6 +61,13 @@ function Home() {
           </div>
         </Link>
 
+        <Link to="/hashtable" className="module-link">
+          <div className="module">
+            <h2 className="module-title">Hash Table</h2>
+            <img src={hashTableImg} alt="Hash Table" className="module-image" />
+          </div>
+        </Link>
+
       </div>
     </div>
   );
@@ -77,8 +89,10 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/linkedlist" element={<LinkedListPage />} />
         <Route path="/bst" element={<BSTPage />} />
+        <Route path="/hashtable" element={<HashTablePage />} />
         <Route path="/quiz/linkedlist" element={<LinkedListQuizPage />} />
         <Route path="/quiz/bst" element={<BSTQuizPage />} />
+        <Route path="/quiz/hashtable" element={<HashTableQuizPage />} />
       </Routes>
     </Router>
   );
