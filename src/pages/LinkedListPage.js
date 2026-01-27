@@ -4,6 +4,13 @@ import {LinkedList} from "../data_structures/LinkedList"
 import "../App.css";
 import "./styles/LinkedListPage.css";
 
+const SPEED_MULTIPLIER = 7.5;
+const delay = (ms) => new Promise(res => setTimeout(res, ms * SPEED_MULTIPLIER));
+
+const slowTimeout = (fn, ms) =>
+  setTimeout(fn, ms * SPEED_MULTIPLIER);
+
+
 function verifyInput(value) {
     return (!Number.isInteger(Number(value)) || value === "" || value.includes("."))
 }
@@ -130,19 +137,19 @@ function LinkedListPage() {
         ]);
 
         // 3: to_insert->next = head;
-        setTimeout(() => {
+        slowTimeout(() => {
             setActiveLine(3);
         }, 250);
 
         // 5: head = to_insert;
-        setTimeout(() => {
+        slowTimeout(() => {
             setActiveLine(5);
             displayList.current.insert(val);
             updateNodes();
         }, 500);
 
         // 7: return head;
-        setTimeout(() => {
+        slowTimeout(() => {
             setActiveLine(7);
             setAnimating(false);
             setActiveNodeIndex(null);
@@ -186,10 +193,10 @@ function LinkedListPage() {
                 // Highlight deletion block
                 setActiveLine(4); // new_head = head->next
 
-                setTimeout(() => setActiveLine(5), 250); // delete head
-                setTimeout(() => setActiveLine(6), 500); // return new_head
+                slowTimeout(() => setActiveLine(5), 250); // delete head
+                slowTimeout(() => setActiveLine(6), 500); // return new_head
 
-                setTimeout(() => {
+                slowTimeout(() => {
                     displayList.current.listDelete(val);
                     updateNodes();
                     setAnimating(false);
@@ -202,7 +209,7 @@ function LinkedListPage() {
             // AFTER HEAD → set prev/curr
             if (i === 0) {
                 setActiveLine(9);  // prev = head
-                setTimeout(() => setActiveLine(10), 250); // curr = head->next
+                slowTimeout(() => setActiveLine(10), 250); // curr = head->next
             }
 
             // Traverse loop
@@ -214,11 +221,11 @@ function LinkedListPage() {
 
                 setActiveLine(13); // if (curr->val == val)
 
-                setTimeout(() => setActiveLine(14), 250); // prev->next = next
-                setTimeout(() => setActiveLine(15), 500); // delete curr
-                setTimeout(() => setActiveLine(16), 750); // return head
+                slowTimeout(() => setActiveLine(14), 250); // prev->next = next
+                slowTimeout(() => setActiveLine(15), 500); // delete curr
+                slowTimeout(() => setActiveLine(16), 750); // return head
 
-                setTimeout(() => {
+                slowTimeout(() => {
                     displayList.current.listDelete(val);
                     updateNodes();
                     setAnimating(false);
@@ -239,7 +246,7 @@ function LinkedListPage() {
             }
 
             setActiveLine(19);  // prev = curr
-            setTimeout(() => setActiveLine(20), 250); // curr = curr->next
+            slowTimeout(() => setActiveLine(20), 250); // curr = curr->next
         }, 700);
     };
 

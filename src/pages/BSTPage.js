@@ -5,11 +5,12 @@ import { Node } from "../data_structures/BST";
 import "../App.css";
 import "./styles/BSTPage.css";
 
+const SPEED_MULTIPLIER = 7.5;
+const delay = (ms) => new Promise(res => setTimeout(res, ms * SPEED_MULTIPLIER));
+
 function verifyInput(value) {
 	return (!Number.isInteger(Number(value)) || value === "" || value.includes("."));
 }
-
-
 
 function BSTPage() {
 	// Tree Display
@@ -168,29 +169,29 @@ function BSTPage() {
 
 		// Line 3: create to_insert
 		setActiveLine(3);
-		await new Promise(res => setTimeout(res, 300));
+		await delay(300);
 
 		// Line 4: curr_node = root
 		setActiveLine(4);
-		await new Promise(res => setTimeout(res, 300));
+		await delay(300);
 
 		// Traverse path, highlight tree nodes + code lines
 		let currNode = displayTree.current.root;
 		while (currNode) {
 			setHighlightedKey(currNode.key);
 			setActiveLine(6); // while loop
-			await new Promise(res => setTimeout(res, 450));
+			await delay(450);
 
 			if (val < currNode.key) {
 				setActiveLine(7); // if (val <)
-				await new Promise(res => setTimeout(res, 300));
+				await delay(300);
 
 				if (!currNode.left) {
 					// Insert left child
 					setActiveLine(8);
-					await new Promise(res => setTimeout(res, 300));
+					await delay(300);
 					setActiveLine(9);
-					await new Promise(res => setTimeout(res, 300));
+					await delay(300);
 					break;
 				}
 
@@ -198,13 +199,13 @@ function BSTPage() {
 				currNode = currNode.left;
 			} else {
 				setActiveLine(17); // else take right path
-				await new Promise(res => setTimeout(res, 300));
+				await delay(300);
 
 				if (!currNode.right) {
 					setActiveLine(18);
-					await new Promise(res => setTimeout(res, 300));
+					await delay(300);
 					setActiveLine(19);
-					await new Promise(res => setTimeout(res, 300));
+					await delay(300);
 					break;
 				}
 
@@ -212,7 +213,7 @@ function BSTPage() {
 				currNode = currNode.right;
 			}
 
-			await new Promise(res => setTimeout(res, 450));
+			await delay(450);
 		}
 
 		// Perform actual insertion
@@ -220,7 +221,7 @@ function BSTPage() {
 		updateNodes();
 
 		setInsertedKey(val);
-		await new Promise(res => setTimeout(res, 700));
+		await delay(700);
 
 		setInsertedKey(null);
 		setHighlightedKey(null);
@@ -246,7 +247,7 @@ function BSTPage() {
 
 		// Line 1: if (root == nullptr)
 		setActiveLine(1);
-		await new Promise(res => setTimeout(res, 300));
+		await delay(300);
 
 		const tree = displayTree.current;
 		const toDelete = tree.search ? tree.search(val) : null;
@@ -257,11 +258,11 @@ function BSTPage() {
 
 		// Line 3: to_delete = search(...)
 		setActiveLine(3);
-		await new Promise(res => setTimeout(res, 350));
+		await delay(350);
 
 		if (!toDelete) {
 			setActiveLine(4); // not found
-			await new Promise(res => setTimeout(res, 350));
+			await delay(350);
 			alert("Value not found.");
 			setAnimating(false);
 			return;
@@ -271,13 +272,13 @@ function BSTPage() {
 		if (!toDelete.left && !toDelete.right) {
 			setActiveLine(6);
 			setHighlightedKey(toDelete.key);
-			await new Promise(res => setTimeout(res, 600));
+			await delay(600);
 
 			setActiveLine(14); // return root
 			tree.treeDelete(val);
 			updateNodes();
 
-			await new Promise(res => setTimeout(res, 500));
+			await delay(500);
 			setHighlightedKey(null);
 			setAnimating(false);
 			return;
@@ -287,13 +288,13 @@ function BSTPage() {
 		if (!toDelete.left || !toDelete.right) {
 			setActiveLine(17);
 			setHighlightedKey(toDelete.key);
-			await new Promise(res => setTimeout(res, 600));
+			await delay(600);
 
 			setActiveLine(31); // return root
 			tree.treeDelete(val);
 			updateNodes();
 
-			await new Promise(res => setTimeout(res, 500));
+			await delay(500);
 			setHighlightedKey(null);
 			setAnimating(false);
 			return;
@@ -301,20 +302,20 @@ function BSTPage() {
 
 		// CASE 3 — two children
 		setActiveLine(34); // find successor
-		await new Promise(res => setTimeout(res, 400));
+		await delay(400);
 
 		const succ = tree.findSuccessor(val);
 		if (succ) {
 			setActiveLine(36);
 			setHighlightedKey(succ.key);
-			await new Promise(res => setTimeout(res, 500));
+			await delay(500);
 		}
 
 		tree.treeDelete(val);
 		updateNodes();
 
 		setActiveLine(51); // return root
-		await new Promise(res => setTimeout(res, 400));
+		await delay(400);
 
 		setHighlightedKey(null);
 		setAnimating(false);

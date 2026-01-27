@@ -1,9 +1,6 @@
 // HashTablePage.js
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-// NOTE: I switched to importing both implementations. Make sure you have a module
-// at ../data_structures/HashTables exporting LinearProbingHashTable and ChainingHashTable.
-// If your repo uses a different name/path (e.g., HashTable.js), adjust this import.
 import {
   LinearProbingHashTable,
   ChainingHashTable,
@@ -11,7 +8,9 @@ import {
 import "../App.css";
 import "./styles/HashTablePage.css";
 
-// Keep the same integer-only validation style as other pages
+const SPEED_MULTIPLIER = 7.5;
+const delay = (ms) => new Promise(res => setTimeout(res, ms * SPEED_MULTIPLIER));
+
 function verifyInput(value) {
   return !Number.isInteger(Number(value)) || value === "" || value.includes(".");
 }
@@ -283,28 +282,28 @@ function HashTablePage() {
       setCodeSnippet(chainingInsertSnippet);
       // animate chain traversal and insertion at head (current UI inserts at head)
       setActiveLine(1);
-      await new Promise((r) => setTimeout(r, 250));
+      await delay(250);
 
       const bucketBefore = tableRef.current.toBucketsArray()[bucketIndex] || [];
       for (let i = 0; i < bucketBefore.length; i++) {
         setActiveEntryIndex(i);
         setActiveLine(8);
-        await new Promise((r) => setTimeout(r, 300));
+        await delay(300);
         if (bucketBefore[i].key === keyNum) {
           // update existing
           setActiveLine(8);
-          await new Promise((r) => setTimeout(r, 250));
+          await delay(250);
           tableRef.current.insert(keyNum, valNum); // update
           syncBucketVM();
           const idx = findEntryIndexInBucket(bucketIndex, keyNum);
           setActiveEntryIndex(idx);
-          await new Promise((r) => setTimeout(r, 500));
+          await delay(500);
           setAnimating(false);
           setActiveEntryIndex(null);
           return;
         }
         setActiveLine(8);
-        await new Promise((r) => setTimeout(r, 200));
+        await delay(200);
       }
 
       // show ghost insert at head
@@ -317,14 +316,14 @@ function HashTablePage() {
         ];
         return copy;
       });
-      await new Promise((r) => setTimeout(r, 300));
+      await delay(300);
 
       tableRef.current.insert(keyNum, valNum);
       syncBucketVM();
       const newIdx = findEntryIndexInBucket(bucketIndex, keyNum);
       setActiveEntryIndex(newIdx);
       setActiveLine(13);
-      await new Promise((r) => setTimeout(r, 600));
+      await delay(600);
       setAnimating(false);
       setActiveEntryIndex(null);
       return;
@@ -332,7 +331,7 @@ function HashTablePage() {
       setCodeSnippet(linearInsertSnippet);
       // linear probing animation
       setActiveLine(1); // compute idx
-      await new Promise((r) => setTimeout(r, 200));
+      await delay(200);
 
       // We'll show probing across indices until finding an empty slot.
       const size = bucketVM.length;
@@ -342,7 +341,7 @@ function HashTablePage() {
         setActiveBucketIndex(probeIdx);
         setActiveEntryIndex(0); // single-slot visualization
         setActiveLine(12); // probing line
-        await new Promise((r) => setTimeout(r, 250));
+        await delay(250);
 
         const slot = bucketVM[probeIdx] && bucketVM[probeIdx][0];
         if (!slot || slot.id === "T") {
@@ -354,25 +353,25 @@ function HashTablePage() {
           });
 
           setActiveLine(7); // place here
-          await new Promise((r) => setTimeout(r, 300));
+          await delay(300);
           // perform insert
           tableRef.current.insert(keyNum, valNum);
           syncBucketVM();
           setActiveEntryIndex(0);
           setActiveLine(9);
-          await new Promise((r) => setTimeout(r, 600));
+          await delay(600);
           setAnimating(false);
           setActiveEntryIndex(null);
           return;
         } else if (slot.key === keyNum) {
           // update existing
           setActiveLine(5);
-          await new Promise((r) => setTimeout(r, 250));
+          await delay(250);
           tableRef.current.insert(keyNum, valNum); // update
           syncBucketVM();
           setActiveEntryIndex(0);
           setActiveLine(9);
-          await new Promise((r) => setTimeout(r, 450));
+          await delay(450);
           setAnimating(false);
           setActiveEntryIndex(null);
           return;
@@ -381,7 +380,7 @@ function HashTablePage() {
         // advance probe
         setActiveLine(11);
         probeIdx = (probeIdx + 1) % size;
-        await new Promise((r) => setTimeout(r, 200));
+        await delay(200);
       }
 
       alert("Table is full (cannot insert)");
@@ -409,33 +408,33 @@ function HashTablePage() {
     setActiveBucketIndex(bucketIndex);
     setActiveEntryIndex(null);
     setActiveLine(1);
-    await new Promise((r) => setTimeout(r, 250));
+    await delay(250);
 
     if (hashMode === "chaining") {
       setCodeSnippet(chainingSearchSnippet);
       const bucket = tableRef.current.toBucketsArray()[bucketIndex] || [];
       setActiveLine(1);
-      await new Promise((r) => setTimeout(r, 200));
+      await delay(200);
 
       for (let i = 0; i < bucket.length; i++) {
         setActiveEntryIndex(i);
         setActiveLine(8);
-        await new Promise((r) => setTimeout(r, 400));
+        await delay(400);
         if (bucket[i].key === keyNum) {
           setActiveLine(6);
           clickEntry(bucket[i]);
-          await new Promise((r) => setTimeout(r, 550));
+          await delay(550);
           setAnimating(false);
           setActiveEntryIndex(null);
           setSearchKey("");
           return;
         }
         setActiveLine(8);
-        await new Promise((r) => setTimeout(r, 250));
+        await delay(250);
       }
 
       setActiveLine(8);
-      await new Promise((r) => setTimeout(r, 250));
+      await delay(250);
       alert("Key not found.");
       setAnimating(false);
       setActiveEntryIndex(null);
@@ -450,14 +449,14 @@ function HashTablePage() {
         setActiveBucketIndex(probeIdx);
         setActiveEntryIndex(0);
         setActiveLine(7);
-        await new Promise((r) => setTimeout(r, 300));
+        await delay(300);
 
         const slotArr = toViewBuckets(tableRef.current, hashMode)[probeIdx] || [];
         const slot = slotArr[0];
         if (!slot) {
           // empty slot => not found
           setActiveLine(7);
-          await new Promise((r) => setTimeout(r, 200));
+          await delay(200);
           alert("Key not found.");
           setAnimating(false);
           setActiveEntryIndex(null);
@@ -467,7 +466,7 @@ function HashTablePage() {
         if (slot.id === "T") {
           // tombstone, keep probing
           setActiveLine(5);
-          await new Promise((r) => setTimeout(r, 180));
+          await delay(180);
           probeIdx = (probeIdx + 1) % size;
           continue;
         }
@@ -475,7 +474,7 @@ function HashTablePage() {
           setActiveLine(6);
           // highlight entry
           clickEntry(tableRef.current.search(keyNum));
-          await new Promise((r) => setTimeout(r, 550));
+          await delay(550);
           setAnimating(false);
           setActiveEntryIndex(null);
           setSearchKey("");
@@ -485,7 +484,7 @@ function HashTablePage() {
         // otherwise continue probing
         setActiveLine(11);
         probeIdx = (probeIdx + 1) % size;
-        await new Promise((r) => setTimeout(r, 200));
+        await delay(200);
       }
 
       alert("Key not found.");
@@ -520,15 +519,15 @@ function HashTablePage() {
       setCodeSnippet(chainingDeleteSnippet);
       const bucket = tableRef.current.toBucketsArray()[bucketIndex] || [];
       setActiveLine(1);
-      await new Promise((r) => setTimeout(r, 250));
+      await delay(250);
 
       for (let i = 0; i < bucket.length; i++) {
         setActiveEntryIndex(i);
         setActiveLine(6);
-        await new Promise((r) => setTimeout(r, 450));
+        await delay(450);
         if (bucket[i].key === keyNum) {
           setActiveLine(7);
-          await new Promise((r) => setTimeout(r, 250));
+          await delay(250);
           setBucketVM((prev) => {
             const copy = prev.map((b) => b.map((e) => ({ ...e })));
             if (copy[bucketIndex] && copy[bucketIndex][i]) {
@@ -537,22 +536,22 @@ function HashTablePage() {
             return copy;
           });
           setActiveLine(9);
-          await new Promise((r) => setTimeout(r, 600));
+          await delay(600);
           tableRef.current.delete(keyNum);
           syncBucketVM();
           setActiveLine(10);
-          await new Promise((r) => setTimeout(r, 250));
+          await delay(250);
           setAnimating(false);
           setActiveEntryIndex(null);
           setDeleteKey("");
           return;
         }
         setActiveLine(12);
-        await new Promise((r) => setTimeout(r, 250));
+        await delay(250);
       }
 
       setActiveLine(15);
-      await new Promise((r) => setTimeout(r, 300));
+      await delay(300);
       alert("Key not found.");
       setAnimating(false);
       setActiveEntryIndex(null);
@@ -567,14 +566,14 @@ function HashTablePage() {
         setActiveBucketIndex(probeIdx);
         setActiveEntryIndex(0);
         setActiveLine(10);
-        await new Promise((r) => setTimeout(r, 300));
+        await delay(300);
 
         const slotArr = toViewBuckets(tableRef.current, hashMode)[probeIdx] || [];
         const slot = slotArr[0];
         if (!slot) {
           // empty => not found
           setActiveLine(7);
-          await new Promise((r) => setTimeout(r, 200));
+          await delay(200);
           alert("Key not found.");
           setAnimating(false);
           setActiveEntryIndex(null);
@@ -585,7 +584,7 @@ function HashTablePage() {
           // tombstone -> continue
           setActiveLine(5);
           probeIdx = (probeIdx + 1) % size;
-          await new Promise((r) => setTimeout(r, 180));
+          await delay(100);
           continue;
         }
         if (slot.key === keyNum) {
@@ -598,11 +597,11 @@ function HashTablePage() {
             return copy;
           });
           setActiveLine(8);
-          await new Promise((r) => setTimeout(r, 450));
+          await delay(450);
           tableRef.current.delete(keyNum);
           syncBucketVM();
           setActiveLine(10);
-          await new Promise((r) => setTimeout(r, 200));
+          await delay(200);
           setAnimating(false);
           setActiveEntryIndex(null);
           setDeleteKey("");
@@ -611,7 +610,7 @@ function HashTablePage() {
         // else continue probing
         setActiveLine(11);
         probeIdx = (probeIdx + 1) % size;
-        await new Promise((r) => setTimeout(r, 200));
+        await delay(200);
       }
 
       alert("Key not found.");
