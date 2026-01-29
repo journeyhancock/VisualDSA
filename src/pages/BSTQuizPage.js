@@ -4,8 +4,6 @@ import { BST, Node } from "../data_structures/BST";
 import "../App.css";
 import "./styles/BSTQuizPage.css";
 
-
-
 function BSTQuizPage() {
     const bstRef = useRef(new BST());
     const [nodesArr, setNodesArr] = useState([]);
@@ -355,6 +353,61 @@ function BSTQuizPage() {
                                     onChange={(e) => setDeletePos(e.target.value)}
                                 />
                                 <button className="actions-button" onClick={handleDelete}>Delete</button>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className={`panel help-panel ${openPanels.help ? "help-open" : ""}`}>
+                        <div
+                            className="panel-header"
+                            onClick={() => togglePanel("help")}
+                        >
+                            <div
+                                className={`triangle-icon ${openPanels.help ? "open" : ""}`}
+                            ></div>
+                            <h3>Help</h3>
+                        </div>
+                        <div className={`panel help-panel ${openPanels.help ? "help-open" : ""}`}></div>
+                        {openPanels.help && (
+                            <div className="panel-body help-body">
+                                <div className="help-text" aria-hidden="true">
+                                    <p>
+                                    The quiz question on the right asks you to perform an operation as if you 
+                                    were the BST function. For example, <strong>Insert(5)</strong> means to determine how the
+                                    tree will look after the operation and make the tree on the left match that
+                                    state.
+                                    </p>
+
+                                    <h4>There are three ways to edit the tree:</h4>
+
+                                    <ul className="help-list">
+                                        <li>
+                                        <strong>Text Input</strong> : Type a level-order array separated by comma-separated values. Use <code>null</code> for empty nodes.
+                                        Example: <code>10, 5, 15, null, 7</code> represents a tree where 10 is root, left child is 5 (which has no left child),
+                                        and right child is 15. 5's right child is 7.
+                                        </li>
+
+                                        <li>
+                                        <strong>Actions</strong> : Use the <em>Insert Node</em> and <em>Delete Node</em> dropdowns:
+                                        <ul>
+                                            <li><strong>Insert:</strong> supply the level-order index where the new node should appear and the new value.</li>
+                                            <li><strong>Delete:</strong> supply the level-order index to set to <code>null</code>.</li>
+                                        </ul>
+                                        </li>
+
+                                        <li>
+                                        <strong>Live Editing</strong> : You can also edit the level-order display directly by clicking a node box
+                                        and changing its number. Changes update the tree visualization.
+                                        </li>
+                                    </ul>
+
+                                    <p className="help-note">
+                                        Tip: indices are 0-based (the tree root has index <code>0</code>). If the question says 
+                                        <strong> Insert(5)</strong>, decide where 5 belongs in the tree, convert that to level-order, then use either Text Input or
+                                        Actions to create that final list. Note that null nodes still receive an index if there are 
+                                        non-null nodes after. The tree <code>10, 5, 15, null, 7</code> has <code>node_4</code> with <code>val=7</code>.
+                                    </p>
+                                    </div>
                             </div>
                         )}
                     </div>

@@ -8,8 +8,6 @@ function verifyInput(value) {
     return !Number.isInteger(Number(value)) || value === "" || value.includes(".");
 }
 
-
-
 function LinkedListQuizPage() {
     const displayList = useRef(new LinkedList());
     const [nodes, setNodes] = useState([]);
@@ -21,7 +19,8 @@ function LinkedListQuizPage() {
     const [openPanels, setOpenPanels] = useState({
         textInput: false,
         insert: false,
-        delete: false
+        delete: false,
+        help: false
     });
 
     const [question, setQuestion] = useState({});
@@ -323,6 +322,62 @@ function LinkedListQuizPage() {
                                 >
                                     Delete
                                 </button>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className={`panel help-panel ${openPanels.help ? "help-open" : ""}`}>
+                        <div
+                            className="panel-header"
+                            onClick={() => togglePanel("help")}
+                        >
+                            <div
+                                className={`triangle-icon ${openPanels.help ? "open" : ""}`}
+                            ></div>
+                            <h3>Help</h3>
+                        </div>
+                        <div className={`panel help-panel ${openPanels.help ? "help-open" : ""}`}></div>
+                        {openPanels.help && (
+                            <div className="panel-body help-body">
+                                <div className="help-text" aria-hidden="true">
+                                    <p>
+                                        The quiz question on the right asks you to perform an operation as if you were the
+                                        linked-list function. For example, <strong>Insert(5)</strong> means to determine how the
+                                        linked list will look after the operation and make the linked list on the left match that
+                                        state.
+                                    </p>
+
+                                    <h4>There are three ways to edit the list:</h4>
+
+                                    <ul className="help-list">
+                                        <li>
+                                        <strong>Text Input</strong> : Type the entire list as comma-separated values and click 
+                                        <kbd> Update List</kbd>. For example:
+                                        <div className="example"><code>1, 2, 3</code></div>
+                                        This represents node_0 = 1 → node_1 = 2 → node_2 = 3 → Null.
+                                        </li>
+
+                                        <li>
+                                        <strong>Actions</strong> : Use the <em>Insert Node</em> and <em>Delete Node</em> dropdowns:
+                                        <ul>
+                                            <li><strong>Insert:</strong> supply the index where the new value should appear and the value.</li>
+                                            <li><strong>Delete:</strong> supply the index of the node to remove.</li>
+                                        </ul>
+                                        </li>
+
+                                        <li>
+                                        <strong>Live Editing</strong> : Click a node in the visualization and edit its numeric value directly.
+                                        Press <kbd>Enter</kbd> or click outside the node to commit.
+                                        </li>
+                                    </ul>
+
+                                    <p className="help-note">
+                                        Tip: indices are 0-based (the head has index <code>0</code>). If the question says 
+                                        <strong> Insert(5)</strong>, decide where 5 belongs in the list order, then use either Text Input or
+                                        Actions to create that final list.
+                                    </p>
+                                    </div>
+
                             </div>
                         )}
                     </div>

@@ -571,6 +571,60 @@ export default function HashTableQuizPage() {
               </div>
             )}
           </div>
+
+          <div className={`panel help-panel ${openPanels.help ? "help-open" : ""}`}>
+            <div
+                className="panel-header"
+                onClick={() => togglePanel("help")}
+            >
+                <div
+                    className={`triangle-icon ${openPanels.help ? "open" : ""}`}
+                ></div>
+                <h3>Help</h3>
+            </div>
+            <div className={`panel help-panel ${openPanels.help ? "help-open" : ""}`}></div>
+            {openPanels.help && (
+                <div className="panel-body help-body">
+                    <div className="help-text" aria-hidden="true">
+                      <p>
+                        This quiz supports two modes: <strong>Chaining</strong> (buckets with linked lists) and
+                        <strong> Linear Probing</strong> (array of slots). Use the Mode panel to switch between them.
+                      </p>
+
+                      <p>
+                      The quiz question on the right asks you to perform an operation as if you 
+                      were the hash table function. For example, <strong>Insert(5, 10)</strong> means to determine how the
+                      key <code>5</code> will be inserted into the hash table and how the table would insert it. Then, make the table on 
+                      the left match that state.
+                      </p>
+
+                        <h4>There are two ways to edit the table:</h4>
+
+                        <ul className="help-list">
+                            <li>
+                            <strong>Actions</strong> : Use the <em>Insert</em> and <em>Delete</em> dropdowns:
+                            <ul>
+                                <li><strong>Insert:</strong> supply the bucket index (the leftmost vertically stacked numbers) where the new <code>key:value</code> pair should appear and the <code>key:value</code> values.</li>
+                                <li><strong>Delete:</strong> supply the bucket index (the leftmost vertically stacked numbers) where the <code>key:value</code> pair to delete is. For chaining, include the index of the pair in the linked list and the value of the key. For linear probing, just include the new key value (only one pair can exist per bucket).</li>
+                            </ul>
+                            </li>
+
+                            <li>
+                            <strong>Live Editing</strong> : You can also edit the table display directly by clicking a node box
+                            and changing the list of <code>key:value</code> pairs. Changes update the table visualization. Make sure to follow 
+                            the comma-separated list format (for chaining) and the <code>key:value</code> pair format. You can delete a pair by 
+                            simply removing it from the table display. For linear probing, make sure to change it to <code>T</code> instead, to
+                            properly represent a deleted pair. 
+                            </li>
+                        </ul>
+
+                        <p className="help-note">
+                            Tip: The hash function used is <code>key % 8</code>.
+                        </p>
+                        </div>
+                </div>
+            )}
+        </div>
         </div>
 
         <div className="quiz-container">
