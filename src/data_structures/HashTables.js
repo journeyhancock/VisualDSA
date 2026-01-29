@@ -13,7 +13,7 @@ class LPEntry {
 }
 
 class LinearProbingHashTable {
-  constructor(initialSize = 8) {
+  constructor(initialSize = 7) {
     this.size = initialSize;
     this.buckets = Array.from({ length: this.size }, () => null);
     // tombstone marker (distinct object)
@@ -180,7 +180,7 @@ class ChainEntry {
 }
 
 class ChainingHashTable {
-  constructor(initialSize = 8) {
+  constructor(initialSize = 7) {
     this.size = initialSize;
     // each bucket is either null or points to head ChainEntry
     this.buckets = Array.from({ length: this.size }, () => null);

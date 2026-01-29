@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { BST, Node } from "../data_structures/BST";
 import "../App.css";
@@ -162,7 +162,7 @@ function BSTQuizPage() {
     const generateRandomArray = () =>
         Array.from({ length: Math.floor(Math.random() * 2) + 3 }, () => Math.floor(Math.random() * 50) + 1);
 
-    const createQuestion = () => {
+    const createQuestion = useCallback(() => {
         const arr = generateRandomArray();
         const baseTree = new BST();
         arr.forEach(v => baseTree.insert(v));
@@ -198,7 +198,11 @@ function BSTQuizPage() {
         bstRef.current = baseTree;
         setNodesArr(treeToLevelOrder(baseTree));
         setQuestion(questionObj);
-    };
+    }, []);
+
+    useEffect(() => {
+        createQuestion();
+    }, [createQuestion]);
 
     const handleSubmit = () => {
         const trimNulls = (arr) => {
@@ -380,13 +384,13 @@ function BSTQuizPage() {
 
                                     <ul className="help-list">
                                         <li>
-                                        <strong>Text Input</strong> : Type a level-order array separated by comma-separated values. Use <code>null</code> for empty nodes.
+                                        <strong>Text Input</strong>: Type a level-order array separated by comma-separated values. Use <code>null</code> for empty nodes.
                                         Example: <code>10, 5, 15, null, 7</code> represents a tree where 10 is root, left child is 5 (which has no left child),
                                         and right child is 15. 5's right child is 7.
                                         </li>
 
                                         <li>
-                                        <strong>Actions</strong> : Use the <em>Insert Node</em> and <em>Delete Node</em> dropdowns:
+                                        <strong>Actions</strong>: Use the <em>Insert Node</em> and <em>Delete Node</em> dropdowns:
                                         <ul>
                                             <li><strong>Insert:</strong> supply the level-order index where the new node should appear and the new value.</li>
                                             <li><strong>Delete:</strong> supply the level-order index to set to <code>null</code>.</li>
@@ -394,7 +398,7 @@ function BSTQuizPage() {
                                         </li>
 
                                         <li>
-                                        <strong>Live Editing</strong> : You can also edit the level-order display directly by clicking a node box
+                                        <strong>Live Editing</strong>: You can also edit the level-order display directly by clicking a node box
                                         and changing its number. Changes update the tree visualization.
                                         </li>
                                     </ul>

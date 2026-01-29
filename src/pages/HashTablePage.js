@@ -18,7 +18,7 @@ function verifyInput(value) {
 function HashTablePage() {
   const [hashMode, setHashMode] = useState("chaining");
 
-  const createTableForMode = React.useCallback((mode, size = 8) =>
+  const createTableForMode = React.useCallback((mode, size = 7) =>
   mode === "linear"
       ? new LinearProbingHashTable(size)
       : new ChainingHashTable(size),
@@ -164,7 +164,7 @@ function HashTablePage() {
 
   // Helper to reset tableRef and VM based on a mode
   const resetAndSeedTable = React.useCallback((mode) => {
-    const t = createTableForMode(mode, 8);
+    const t = createTableForMode(mode, 7);
     [
       [1, 10],
       [9, 90],

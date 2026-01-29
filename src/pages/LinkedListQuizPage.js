@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { LinkedList } from "../data_structures/LinkedList";
 import "../App.css";
@@ -56,7 +56,7 @@ function LinkedListQuizPage() {
         return Array.from({ length }, () => Math.floor(Math.random() * 9) + 1);
     };
 
-    const createQuestion = () => {
+    const createQuestion = useCallback(() => {
         const list = generateRandomList();
         const type = Math.random() < 0.5 ? "insert" : "delete";
         const pos = Math.floor(Math.random() * list.length);
@@ -90,7 +90,11 @@ function LinkedListQuizPage() {
         for (let i = list.length - 1; i >= 0; i--) newList.insert(list[i]);
         displayList.current = newList;
         setNodes(newList.toArray());
-    };
+    }, []);
+
+    useEffect(() => {
+        createQuestion();
+    }, [createQuestion]);
 
     const updateNodes = () => setNodes(displayList.current.toArray());
 
@@ -347,14 +351,14 @@ function LinkedListQuizPage() {
 
                                     <ul className="help-list">
                                         <li>
-                                        <strong>Text Input</strong> : Type the entire list as comma-separated values and click 
+                                        <strong>Text Input</strong>: Type the entire list as comma-separated values and click 
                                         <kbd> Update List</kbd>. For example:
                                         <div className="example"><code>1, 2, 3</code></div>
                                         This represents node_0 = 1 → node_1 = 2 → node_2 = 3 → Null.
                                         </li>
 
                                         <li>
-                                        <strong>Actions</strong> : Use the <em>Insert Node</em> and <em>Delete Node</em> dropdowns:
+                                        <strong>Actions</strong>: Use the <em>Insert Node</em> and <em>Delete Node</em> dropdowns:
                                         <ul>
                                             <li><strong>Insert:</strong> supply the index where the new value should appear and the value.</li>
                                             <li><strong>Delete:</strong> supply the index of the node to remove.</li>
@@ -362,7 +366,7 @@ function LinkedListQuizPage() {
                                         </li>
 
                                         <li>
-                                        <strong>Live Editing</strong> : Click a node in the visualization and edit its numeric value directly.
+                                        <strong>Live Editing</strong>: Click a node in the visualization and edit its numeric value directly.
                                         Press <kbd>Enter</kbd> or click outside the node to commit.
                                         </li>
                                     </ul>
