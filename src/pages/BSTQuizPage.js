@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { BST, Node } from "../data_structures/BST";
 import "../App.css";
@@ -199,8 +199,6 @@ function BSTQuizPage() {
         setNodesArr(treeToLevelOrder(baseTree));
         setQuestion(questionObj);
     };
-
-    useEffect(() => { createQuestion(); }, []);
 
     const handleSubmit = () => {
         const trimNulls = (arr) => {

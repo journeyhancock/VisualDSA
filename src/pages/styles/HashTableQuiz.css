@@ -25,7 +25,6 @@
   padding: 1rem 0;
 }
 
-/* Layout: visualization + side-actions + quiz-container (BSTQuiz style) :contentReference[oaicite:12]{index=12} */
 .hashtable-quiz-content {
   flex: 1;
   display: flex;
@@ -257,7 +256,6 @@
   background: #161b22;
 }
 
-/* Feedback overlay mirrors existing quiz overlay styling :contentReference[oaicite:13]{index=13} */
 .quiz-overlay {
   position: absolute;
   top: 50%;

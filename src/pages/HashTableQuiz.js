@@ -106,41 +106,6 @@ export default function HashTableQuizPage() {
     }
   }
 
-  function stringsToDS(strings, modeArg) {
-    const ds = createEmptyTableForMode(modeArg);
-    if (modeArg === "chaining") {
-      for (let i = 0; i < strings.length; i++) {
-        const parsed = parseChainingBucket(strings[i]);
-        if (parsed === null) return null;
-        for (let j = parsed.length - 1; j >= 0; j--) {
-          ds.insert(parsed[j].key, parsed[j].value);
-        }
-      }
-      return ds;
-    } else {
-      const parsedSlots = [];
-      for (const s of strings) {
-        const p = parseLinearSlot(s);
-        if (p === null) {
-          const up = (s ?? "").trim();
-          if (up.toUpperCase() === "T" || up === "") {
-            parsedSlots.push(up.toUpperCase() === "T" ? "T" : null);
-            continue;
-          }
-          return null;
-        }
-        parsedSlots.push(p === "T" ? "T" : p);
-      }
-      // Build DS by inserting entries found
-      const entries = parsedSlots
-        .map((s) => (s === null || s === "T" ? null : { k: s.key, v: s.value }))
-        .filter(Boolean);
-      const ds2 = createEmptyTableForMode(modeArg);
-      entries.forEach((e) => ds2.insert(e.k, e.v));
-      return { ds: ds2, parsedSlots };
-    }
-  }
-
   const createQuestion = () => {
     const baseCount = Math.floor(Math.random() * 4) + 4;
     const baseSet = new Set();
@@ -311,7 +276,6 @@ export default function HashTableQuizPage() {
       alert("Enter valid integers for hash index and key");
       return;
     }
-    const idx = Number(idxStr);
     const k = Number(kStr);
 
     const ds = htRef.current || createEmptyTableForMode(mode);

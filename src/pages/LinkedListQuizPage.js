@@ -92,10 +92,6 @@ function LinkedListQuizPage() {
         setNodes(newList.toArray());
     };
 
-    useEffect(() => {
-        createQuestion();
-    }, []);
-
     const updateNodes = () => setNodes(displayList.current.toArray());
 
     const handleTextInput = () => {

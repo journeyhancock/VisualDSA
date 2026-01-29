@@ -5,11 +5,9 @@ import "../App.css";
 import "./styles/LinkedListPage.css";
 
 const SPEED_MULTIPLIER = 7.5;
-const delay = (ms) => new Promise(res => setTimeout(res, ms * SPEED_MULTIPLIER));
 
 const slowTimeout = (fn, ms) =>
   setTimeout(fn, ms * SPEED_MULTIPLIER);
-
 
 function verifyInput(value) {
     return (!Number.isInteger(Number(value)) || value === "" || value.includes("."))
@@ -47,7 +45,7 @@ function LinkedListPage() {
         }));
     };
 
-    const [animating, setAnimating] = useState(false);
+    const [setAnimating] = useState(false);
     const [activeLine, setActiveLine] = useState(null);
     const [activeNodeIndex, setActiveNodeIndex] = useState(null);
 
@@ -88,9 +86,7 @@ function LinkedListPage() {
         const arr = displayList.current.toArray();
         setNodes(arr);
 
-        // Selected node exists?
         if (selectedNodeRef) {
-
             // Check if this node is still in the linked list
             let stillExists = false;
             let curr = displayList.current.head;
@@ -105,7 +101,7 @@ function LinkedListPage() {
             if (stillExists) {
                 setSelectedNodeCode(generateNodeCode(selectedNodeRef));
             } else {
-                // Node was deleted → show "null" placeholder
+                // Node was deleted
                 setSelectedNodeCode(generateNodeCode(null));
                 setSelectedNodeRef(null);
             }
@@ -128,27 +124,22 @@ function LinkedListPage() {
         setActiveNodeIndex(0);
         setAnimating(true);
 
-        // 1: Node* to_insert = new Node(val);
         setActiveLine(1);
-
         setNodes(prev => [
             { value: val, animClass: "node-inserting" },
             ...prev.map(n => ({ value: n.value ?? n, animClass: "" }))
         ]);
 
-        // 3: to_insert->next = head;
         slowTimeout(() => {
             setActiveLine(3);
         }, 250);
 
-        // 5: head = to_insert;
         slowTimeout(() => {
             setActiveLine(5);
             displayList.current.insert(val);
             updateNodes();
         }, 500);
 
-        // 7: return head;
         slowTimeout(() => {
             setActiveLine(7);
             setAnimating(false);
@@ -172,29 +163,25 @@ function LinkedListPage() {
         const currentNodes = [...nodes];
         let i = 0;
 
-        // Start of function
-        setActiveLine(1); // if (head == nullptr)
+        setActiveLine(1);
 
-        // Highlight head node first
         setActiveNodeIndex(0);
 
         let interval = setInterval(() => {
             setActiveNodeIndex(i);
 
-            // Check head match — line 3
             if (i === 0) setActiveLine(3);
 
             const nodeValue = currentNodes[i].value ?? currentNodes[i];
 
-            // HEAD CASE
             if (i === 0 && nodeValue === val) {
                 clearInterval(interval);
 
                 // Highlight deletion block
-                setActiveLine(4); // new_head = head->next
+                setActiveLine(4);
 
-                slowTimeout(() => setActiveLine(5), 250); // delete head
-                slowTimeout(() => setActiveLine(6), 500); // return new_head
+                slowTimeout(() => setActiveLine(5), 250); 
+                slowTimeout(() => setActiveLine(6), 500); 
 
                 slowTimeout(() => {
                     displayList.current.listDelete(val);
@@ -206,24 +193,21 @@ function LinkedListPage() {
                 return;
             }
 
-            // AFTER HEAD → set prev/curr
             if (i === 0) {
-                setActiveLine(9);  // prev = head
-                slowTimeout(() => setActiveLine(10), 250); // curr = head->next
+                setActiveLine(9);
+                slowTimeout(() => setActiveLine(10), 250);
             }
 
-            // Traverse loop
-            setActiveLine(12); // while (curr != nullptr)
+            setActiveLine(12);
 
-            // MATCH INSIDE LOOP
             if (nodeValue === val) {
                 clearInterval(interval);
 
-                setActiveLine(13); // if (curr->val == val)
+                setActiveLine(13); 
 
-                slowTimeout(() => setActiveLine(14), 250); // prev->next = next
-                slowTimeout(() => setActiveLine(15), 500); // delete curr
-                slowTimeout(() => setActiveLine(16), 750); // return head
+                slowTimeout(() => setActiveLine(14), 250); 
+                slowTimeout(() => setActiveLine(15), 500); 
+                slowTimeout(() => setActiveLine(16), 750); 
 
                 slowTimeout(() => {
                     displayList.current.listDelete(val);
@@ -235,18 +219,17 @@ function LinkedListPage() {
                 return;
             }
 
-            // Move forward (no match)
             i++;
 
             if (i >= currentNodes.length) {
                 clearInterval(interval);
-                setActiveLine(23); // return head (no deletion)
+                setActiveLine(23);
                 setAnimating(false);
                 return;
             }
 
-            setActiveLine(19);  // prev = curr
-            slowTimeout(() => setActiveLine(20), 250); // curr = curr->next
+            setActiveLine(19);
+            slowTimeout(() => setActiveLine(20), 250);
         }, 700);
     };
 
@@ -414,27 +397,6 @@ function LinkedListPage() {
                             </div>
                         )}
                     </div>
-
-                    {/* Controls panel */}
-                    {/* <div className="panel controls-panel">
-                        <div className="panel-header" onClick={() => togglePanel("controls")}>
-                            <div className={`triangle-icon ${openPanels.controls ? "open" : ""}`}></div>
-                            <h3>Controls</h3>
-                        </div> 
-
-                        {openPanels.controls && (
-                            <div className="panel-body controls-body">
-                                <div className="controls-row">
-                                    <button className="controls-button">&gt; Play</button>
-                                    <button className="controls-button">&gt;&gt; Step</button>
-                                </div>
-                                <div className="controls-row">
-                                    <button className="controls-button">|| Pause</button>
-                                    <button className="controls-button">&lt;&lt; Step</button>
-                                </div>
-                            </div>
-                        )}
-                    </div> */}
                 </div>
 
                 {/* Code */}

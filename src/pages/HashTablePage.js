@@ -1,5 +1,5 @@
 // HashTablePage.js
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   LinearProbingHashTable,
@@ -16,20 +16,17 @@ function verifyInput(value) {
 }
 
 function HashTablePage() {
-  // Choice of implementation: 'chaining' or 'linear'
   const [hashMode, setHashMode] = useState("chaining");
 
-  // Build the initial tableRef depending on mode
-  const createTableForMode = (mode, size = 8) =>
-    mode === "linear"
+  const createTableForMode = React.useCallback((mode, size = 8) =>
+  mode === "linear"
       ? new LinearProbingHashTable(size)
-      : new ChainingHashTable(size);
+      : new ChainingHashTable(size),
+  []);
 
   const tableRef = useRef(createTableForMode(hashMode));
   const initialized = useRef(false);
 
-  // Visual model: for chaining -> array of chains (arrays)
-  // for linear -> array of single-slot arrays (0 or 1 element) to reuse same rendering code
   const [bucketVM, setBucketVM] = useState(() =>
     toViewBuckets(tableRef.current, hashMode)
   );
@@ -56,7 +53,7 @@ function HashTablePage() {
   const [deleteKey, setDeleteKey] = useState("");
   const [searchKey, setSearchKey] = useState("");
 
-  // Animation / highlights (bucket + entry index within bucket)
+  // Animation / highlights
   const [animating, setAnimating] = useState(false);
   const [activeLine, setActiveLine] = useState(null);
   const [activeBucketIndex, setActiveBucketIndex] = useState(null);
@@ -73,21 +70,24 @@ function HashTablePage() {
     }));
   };
 
-  const formatBlock = (str) =>
+  const formatBlock = React.useCallback((str) =>
     str
       .trim()
       .split("\n")
       .map((line) => line.trimEnd())
-      .join("\n");
+      .join("\n"),
+    []
+  );
 
-  const generateEntryCode = (entryObj) => {
+  const generateEntryCode = React.useCallback(
+  (entryObj) => {
     if (!entryObj) {
       return formatBlock(
         `Entry* entry {
-  int key = null;
-  int value = null;
-  Entry* next = null;
-}`
+        int key = null;
+        int value = null;
+        Entry* next = null;
+      }`
       );
     }
 
@@ -96,16 +96,17 @@ function HashTablePage() {
 
     return formatBlock(
       `Entry* entry_${id} {
-  int key = ${entryObj.key};
-  int value = ${entryObj.value};
-  Entry* next = ${nextId !== null ? `entry_${nextId}` : "nullptr"};
-}`
+      int key = ${entryObj.key};
+      int value = ${entryObj.value};
+      Entry* next = ${nextId !== null ? `entry_${nextId}` : "nullptr"};
+    }`
     );
-  };
+  },
+  [formatBlock]
+);
 
-  // Load snippets (mirrors LinkedList/BST pattern)
+  // Load snippets
   useEffect(() => {
-    // We keep the default snippets (generic) but you'll drop the new .txt files into /public/code/HashTable/
     fetch("/code/HashTable/chaining_insert.txt")
       .then((res) => res.text())
       .then((text) => setChainingInsertSnippet(text.split("\n")))
@@ -127,7 +128,6 @@ function HashTablePage() {
   }, []);
 
   useEffect(() => {
-    // We keep the default snippets (generic) but you'll drop the new .txt files into /public/code/HashTable/
     fetch("/code/HashTable/linear_insert.txt")
       .then((res) => res.text())
       .then((text) => setLinearInsertSnippet(text.split("\n")))
@@ -155,7 +155,6 @@ function HashTablePage() {
       .catch((err) => console.error("Error loading code:", err));
   }, []);
 
-  // Initialize table with a deterministic set (so collisions visible)
   useEffect(() => {
     if (initialized.current) return;
     initialized.current = true;
@@ -164,13 +163,12 @@ function HashTablePage() {
   }, []);
 
   // Helper to reset tableRef and VM based on a mode
-  function resetAndSeedTable(mode) {
+  const resetAndSeedTable = React.useCallback((mode) => {
     const t = createTableForMode(mode, 8);
-    // same seeds as before
     [
       [1, 10],
-      [9, 90], // collides with 1 when size=8
-      [17, 170], // collides too
+      [9, 90],
+      [17, 170],
       [2, 20],
       [3, 30],
     ].forEach(([k, v]) => t.insert(k, v));
@@ -178,41 +176,37 @@ function HashTablePage() {
     setBucketVM(toViewBuckets(t, mode));
     setSelectedEntryRef(null);
     setSelectedEntryCode(generateEntryCode(null));
-  }
+  }, [createTableForMode, generateEntryCode]);
 
-  // When user toggles hashMode, recreate table + view
+  // recreate table + view
   useEffect(() => {
     resetAndSeedTable(hashMode);
     // reset UI highlights
     setActiveBucketIndex(null);
     setActiveEntryIndex(null);
     setAnimating(false);
-  }, [hashMode]);
+  }, [hashMode, resetAndSeedTable]);
 
-  // Convert the data structure to the view-format used by the renderer.
-  // For chaining: return t.toBucketsArray() (array of arrays).
-  // For linear: convert snapshot into array-of-singleton-arrays or [] for empty.
+  // Convert the data structure to the render format
+  // chaining: return t.toBucketsArray() (array of arrays)
+  // linear: convert snapshot into array-of-singleton-arrays
   function toViewBuckets(t, mode) {
     if (!t) return [];
     if (mode === "chaining") {
-      // chaining impl should provide toBucketsArray()
       if (typeof t.toBucketsArray === "function") {
         return t.toBucketsArray().map((b) => b.map((e) => ({ ...e, animClass: "" })));
       } else {
-        // fallback: try snapshot style
         return [];
       }
     } else {
-      // linear: try snapshot() or toBucketsArray where each slot is null/"T"/entry
       if (typeof t.snapshot === "function") {
-        const snap = t.snapshot(); // array of null / "T" / {key,value,id}
+        const snap = t.snapshot();
         return snap.map((s) => {
           if (s === null) return [];
           if (s === "T") return [{ id: "T", key: null, value: "T", animClass: "tombstone" }];
           return [{ ...s, animClass: "" }];
         });
       } else if (typeof t.toBucketsArray === "function") {
-        // If the linear impl exposed toBucketsArray as single-slot arrays already, just copy
         return t.toBucketsArray().map((b) => b.map((e) => ({ ...e, animClass: "" })));
       } else {
         return [];
@@ -243,13 +237,10 @@ function HashTablePage() {
     setSelectedEntryCode(generateEntryCode(entryObj));
   };
 
-  // Visual helper: find index of entry with `key` inside view bucket bIdx (or -1)
   const findEntryIndexInBucket = (bucketIndex, key) => {
     const bucket = toViewBuckets(tableRef.current, hashMode)[bucketIndex] || [];
     return bucket.findIndex((e) => e.key === Number(key));
   };
-
-  // --- Handlers (branch behaviors by hashMode) ---
 
   const handleInsert = async () => {
     const k = insertKey.trim();
@@ -269,7 +260,7 @@ function HashTablePage() {
     setInsertKey("");
     setInsertValue("");
 
-    // compute bucket/home index using the DS's _hash (both impls expose _hash in our earlier conversions)
+    // compute bucket/home index using the hash function
     const bucketIndex =
       typeof tableRef.current._hash === "function"
         ? tableRef.current._hash(keyNum)
@@ -280,7 +271,7 @@ function HashTablePage() {
 
     if (hashMode === "chaining") {
       setCodeSnippet(chainingInsertSnippet);
-      // animate chain traversal and insertion at head (current UI inserts at head)
+      // animate chain traversal and insertion at head
       setActiveLine(1);
       await delay(250);
 
@@ -290,10 +281,9 @@ function HashTablePage() {
         setActiveLine(8);
         await delay(300);
         if (bucketBefore[i].key === keyNum) {
-          // update existing
           setActiveLine(8);
           await delay(250);
-          tableRef.current.insert(keyNum, valNum); // update
+          tableRef.current.insert(keyNum, valNum);
           syncBucketVM();
           const idx = findEntryIndexInBucket(bucketIndex, keyNum);
           setActiveEntryIndex(idx);
@@ -306,7 +296,6 @@ function HashTablePage() {
         await delay(200);
       }
 
-      // show ghost insert at head
       setActiveLine(11);
       setBucketVM((prev) => {
         const copy = prev.map((b) => b.map((e) => ({ ...e, animClass: "" })));
@@ -329,32 +318,28 @@ function HashTablePage() {
       return;
     } else {
       setCodeSnippet(linearInsertSnippet);
-      // linear probing animation
-      setActiveLine(1); // compute idx
+      setActiveLine(1);
       await delay(200);
 
-      // We'll show probing across indices until finding an empty slot.
       const size = bucketVM.length;
       let probeIdx = bucketIndex;
       for (let steps = 0; steps < size; steps++) {
-        // highlight probed slot
         setActiveBucketIndex(probeIdx);
-        setActiveEntryIndex(0); // single-slot visualization
-        setActiveLine(12); // probing line
+        setActiveEntryIndex(0);
+        setActiveLine(12);
         await delay(250);
 
         const slot = bucketVM[probeIdx] && bucketVM[probeIdx][0];
         if (!slot || slot.id === "T") {
-          // show ghost insert here
+          const insertIdx = probeIdx;
           setBucketVM((prev) => {
             const copy = prev.map((b) => b.map((e) => ({ ...e, animClass: "" })));
-            copy[probeIdx] = [{ id: "ghost", key: keyNum, value: valNum, animClass: "node-inserting" }];
+            copy[insertIdx] = [{ id: "ghost", key: keyNum, value: valNum, animClass: "node-inserting" }];
             return copy;
           });
 
-          setActiveLine(7); // place here
+          setActiveLine(7); 
           await delay(300);
-          // perform insert
           tableRef.current.insert(keyNum, valNum);
           syncBucketVM();
           setActiveEntryIndex(0);
@@ -364,7 +349,6 @@ function HashTablePage() {
           setActiveEntryIndex(null);
           return;
         } else if (slot.key === keyNum) {
-          // update existing
           setActiveLine(5);
           await delay(250);
           tableRef.current.insert(keyNum, valNum); // update
@@ -442,7 +426,6 @@ function HashTablePage() {
       return;
     } else {
       setCodeSnippet(linearSearchSnippet);
-      // linear probing search
       const size = bucketVM.length;
       let probeIdx = bucketIndex;
       for (let steps = 0; steps < size; steps++) {
@@ -454,7 +437,6 @@ function HashTablePage() {
         const slotArr = toViewBuckets(tableRef.current, hashMode)[probeIdx] || [];
         const slot = slotArr[0];
         if (!slot) {
-          // empty slot => not found
           setActiveLine(7);
           await delay(200);
           alert("Key not found.");
@@ -464,7 +446,6 @@ function HashTablePage() {
           return;
         }
         if (slot.id === "T") {
-          // tombstone, keep probing
           setActiveLine(5);
           await delay(180);
           probeIdx = (probeIdx + 1) % size;
@@ -472,7 +453,6 @@ function HashTablePage() {
         }
         if (slot.key === keyNum) {
           setActiveLine(6);
-          // highlight entry
           clickEntry(tableRef.current.search(keyNum));
           await delay(550);
           setAnimating(false);
@@ -559,7 +539,6 @@ function HashTablePage() {
       return;
     } else {
       setCodeSnippet(linearDeleteSnippet);
-      // linear probing delete -> mark tombstone
       const size = bucketVM.length;
       let probeIdx = bucketIndex;
       for (let steps = 0; steps < size; steps++) {
@@ -571,7 +550,6 @@ function HashTablePage() {
         const slotArr = toViewBuckets(tableRef.current, hashMode)[probeIdx] || [];
         const slot = slotArr[0];
         if (!slot) {
-          // empty => not found
           setActiveLine(7);
           await delay(200);
           alert("Key not found.");
@@ -581,18 +559,17 @@ function HashTablePage() {
           return;
         }
         if (slot.id === "T"){
-          // tombstone -> continue
           setActiveLine(5);
           probeIdx = (probeIdx + 1) % size;
           await delay(100);
           continue;
         }
         if (slot.key === keyNum) {
-          // animate delete
+          const deleteIdx = probeIdx;
           setBucketVM((prev) => {
             const copy = prev.map((b) => b.map((e) => ({ ...e })));
-            if (copy[probeIdx] && copy[probeIdx][0]) {
-              copy[probeIdx][0].animClass = "node-deleting";
+            if (copy[deleteIdx] && copy[deleteIdx][0]) {
+              copy[deleteIdx][0].animClass = "node-deleting";
             }
             return copy;
           });
@@ -621,7 +598,6 @@ function HashTablePage() {
     }
   };
 
-  // --- UI rendering ---
   return (
     <div className="hashtable-page">
       <h1 className="page-title">Hash Table</h1>
@@ -659,13 +635,12 @@ function HashTablePage() {
                           onClick={() =>
                             entry.id !== "ghost" &&
                             clickEntry(
-                              // for linear probing the DS.search returns entry object; for chaining similar
                               tableRef.current.search(entry.key) || entry
                             )
                           }
                           title="Click to inspect entry"
                         >
-                          {/* For tombstones show 'T' */}
+                          {/* Show T for tombstones */}
                           {entry.id === "T" ? "T" : `${entry.key}:${entry.value}`}
                         </div>
                         {hashMode === "chaining" && eIdx < bucket.length - 1 && <div className="arrow">→</div>}
@@ -756,7 +731,7 @@ function HashTablePage() {
             )}
           </div>
 
-          {/* Hash Table panel (new) */}
+          {/* Hash Table panel */}
           <div className="panel hashtable-panel">
             <div className="panel-header" onClick={() => togglePanel("hashTable")}>
               <div className={`triangle-icon ${openPanels.hashTable ? "open" : ""}`}></div>

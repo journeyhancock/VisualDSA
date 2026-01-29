@@ -16,6 +16,7 @@ function BSTPage() {
 	// Tree Display
 	const displayTree = useRef(new BST());
 	const initialized = useRef(false);
+	// eslint-disable-next-line
 	const [nodes, setNodes] = useState(displayTree.current.toArray());
 
 	// Actions and state
@@ -40,7 +41,7 @@ function BSTPage() {
 	// Animation / highlights
 	const [animating, setAnimating] = useState(false);
 	const [highlightedKey, setHighlightedKey] = useState(null);
-	const [deletedKey, setDeletedKey] = useState(null);
+	const [deletedKey] = useState(null);
 	const [insertedKey, setInsertedKey] = useState(null);
 	const [hoveredKey, setHoveredKey] = useState(null);
 	const [activeLine, setActiveLine] = useState(null);
@@ -135,18 +136,6 @@ function BSTPage() {
 		);
 	};
 
-	const getTraversalPath = (val) => {
-		const path = [];
-		let current = displayTree.current.root;
-		while (current) {
-			path.push(current.key);
-			if (val === current.key) break;
-			if (val < current.key) current = current.left;
-			else current = current.right;
-		}
-		return path;
-	};
-
 	const handleInsert = async () => {
 		setCodeSnippet(insertSnippet.join("\n"));
 
@@ -167,23 +156,21 @@ function BSTPage() {
 		if (animating) return;
 		setAnimating(true);
 
-		// Line 3: create to_insert
 		setActiveLine(3);
 		await delay(300);
 
-		// Line 4: curr_node = root
 		setActiveLine(4);
 		await delay(300);
 
-		// Traverse path, highlight tree nodes + code lines
+		// Traverse path and highlight tree nodes + code lines
 		let currNode = displayTree.current.root;
 		while (currNode) {
 			setHighlightedKey(currNode.key);
-			setActiveLine(6); // while loop
+			setActiveLine(6); 
 			await delay(450);
 
 			if (val < currNode.key) {
-				setActiveLine(7); // if (val <)
+				setActiveLine(7); 
 				await delay(300);
 
 				if (!currNode.left) {
@@ -195,10 +182,10 @@ function BSTPage() {
 					break;
 				}
 
-				setActiveLine(14); // curr = curr->left
+				setActiveLine(14);
 				currNode = currNode.left;
 			} else {
-				setActiveLine(17); // else take right path
+				setActiveLine(17);
 				await delay(300);
 
 				if (!currNode.right) {
@@ -209,7 +196,7 @@ function BSTPage() {
 					break;
 				}
 
-				setActiveLine(23); // curr = curr->right
+				setActiveLine(23); 
 				currNode = currNode.right;
 			}
 
@@ -225,7 +212,7 @@ function BSTPage() {
 
 		setInsertedKey(null);
 		setHighlightedKey(null);
-		setActiveLine(28); // return root
+		setActiveLine(28);
 
 		setAnimating(false);
 	};
@@ -245,7 +232,6 @@ function BSTPage() {
 		if (animating) return;
 		setAnimating(true);
 
-		// Line 1: if (root == nullptr)
 		setActiveLine(1);
 		await delay(300);
 
@@ -256,12 +242,11 @@ function BSTPage() {
 			setSelectedNodeCode(generateNodeCode(null));
 		}
 
-		// Line 3: to_delete = search(...)
 		setActiveLine(3);
 		await delay(350);
 
 		if (!toDelete) {
-			setActiveLine(4); // not found
+			setActiveLine(4); 
 			await delay(350);
 			alert("Value not found.");
 			setAnimating(false);
@@ -274,7 +259,7 @@ function BSTPage() {
 			setHighlightedKey(toDelete.key);
 			await delay(600);
 
-			setActiveLine(14); // return root
+			setActiveLine(14); 
 			tree.treeDelete(val);
 			updateNodes();
 
@@ -290,7 +275,7 @@ function BSTPage() {
 			setHighlightedKey(toDelete.key);
 			await delay(600);
 
-			setActiveLine(31); // return root
+			setActiveLine(31); 
 			tree.treeDelete(val);
 			updateNodes();
 
@@ -301,7 +286,7 @@ function BSTPage() {
 		}
 
 		// CASE 3 — two children
-		setActiveLine(34); // find successor
+		setActiveLine(34);
 		await delay(400);
 
 		const succ = tree.findSuccessor(val);
@@ -314,7 +299,7 @@ function BSTPage() {
 		tree.treeDelete(val);
 		updateNodes();
 
-		setActiveLine(51); // return root
+		setActiveLine(51); 
 		await delay(400);
 
 		setHighlightedKey(null);
@@ -551,26 +536,6 @@ function BSTPage() {
 							</div>
 						)}
 					</div>
-
-					{/* <div className="panel controls-panel">
-						<div className="panel-header" onClick={() => togglePanel("controls")}>
-							<div className={`triangle-icon ${openPanels.controls ? "open" : ""}`}></div>
-							<h3>Controls</h3>
-						</div>
-
-						{openPanels.controls && (
-							<div className="panel-body controls-body">
-								<div className="controls-row">
-									<button className="controls-button">&gt; Play</button>
-									<button className="controls-button">&gt;&gt; Step</button>
-								</div>
-								<div className="controls-row">
-									<button className="controls-button">|| Pause</button>
-									<button className="controls-button">&lt;&lt; Step</button>
-								</div>
-							</div>
-						)}
-					</div> */}
 				</div>
 
 				<div className="code-panel">
