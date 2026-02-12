@@ -45,7 +45,7 @@ function LinkedListPage() {
         }));
     };
 
-    const [setAnimating] = useState(false);
+    const [, setAnimating] = useState(false);
     const [activeLine, setActiveLine] = useState(null);
     const [activeNodeIndex, setActiveNodeIndex] = useState(null);
 
