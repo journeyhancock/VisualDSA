@@ -45,6 +45,7 @@ function HashTablePage() {
     nodes: false,
     actions: false,
     hashTable: false,
+    hash: false
   });
 
   // Inputs
@@ -52,6 +53,7 @@ function HashTablePage() {
   const [insertValue, setInsertValue] = useState("");
   const [deleteKey, setDeleteKey] = useState("");
   const [searchKey, setSearchKey] = useState("");
+  const [hashDisplay, setHashDisplay] = useState("");
 
   // Animation / highlights
   const [animating, setAnimating] = useState(false);
@@ -266,6 +268,8 @@ function HashTablePage() {
         ? tableRef.current._hash(keyNum)
         : Math.abs(keyNum) % bucketVM.length;
 
+    setHashDisplay(`hash(${keyNum}) = ${keyNum} % ${bucketVM.length} = ${bucketIndex}`);
+
     setActiveBucketIndex(bucketIndex);
     setActiveEntryIndex(null);
 
@@ -389,6 +393,8 @@ function HashTablePage() {
         ? tableRef.current._hash(keyNum)
         : Math.abs(keyNum) % bucketVM.length;
 
+    setHashDisplay(`hash(${keyNum}) = ${keyNum} % ${bucketVM.length} = ${bucketIndex}`);
+
     setActiveBucketIndex(bucketIndex);
     setActiveEntryIndex(null);
     setActiveLine(1);
@@ -489,6 +495,8 @@ function HashTablePage() {
       typeof tableRef.current._hash === "function"
         ? tableRef.current._hash(keyNum)
         : Math.abs(keyNum) % bucketVM.length;
+
+    setHashDisplay(`hash(${keyNum}) = ${keyNum} % ${bucketVM.length} = ${bucketIndex}`);
 
     setActiveBucketIndex(bucketIndex);
     setActiveEntryIndex(null);
@@ -763,6 +771,22 @@ function HashTablePage() {
                     />{" "}
                     Linear Probing
                   </label>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Hash Function Display panel */}
+          <div className="panel hash-display-panel">
+            <div className="panel-header" onClick={() => togglePanel("hash")}>
+              <div className={`triangle-icon ${openPanels.hash ? "open" : ""}`}></div>
+              <h3>Hash Function</h3>
+            </div>
+
+            {openPanels.hash && (
+              <div className="panel-body hash-display-body">
+                <div className="hash-display-text">
+                  {hashDisplay === "" ? "No hash computed yet." : hashDisplay}
                 </div>
               </div>
             )}

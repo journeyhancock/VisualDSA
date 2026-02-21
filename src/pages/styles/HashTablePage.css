@@ -269,6 +269,19 @@
   box-sizing: border-box;
 }
 
+.hash-display-text {
+  background: #0D1117;
+  border: 1px solid #2D333B;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-family: "Courier New", monospace;
+  font-size: 14px;
+  color: #F0F6FC;
+  box-sizing: border-box;
+  text-align: center;
+  width: 100%;
+}
+
 /* Code display panel */
 .code-panel {
   width: 25%;

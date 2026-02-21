@@ -81,9 +81,9 @@ function App() {
     <Router>
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
       <div className="hamburger" onClick={toggleSidebar}>
-        <div className="bar"></div>
-        <div className="bar"></div>
-        <div className="bar"></div>
+        <span className="hamburger-text">
+          {sidebarOpen ? "Close Navigation" : "Open Navigation"}
+        </span>
       </div>
       <Routes>
         <Route path="/" element={<Home />} />
