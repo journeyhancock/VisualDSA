@@ -1,422 +1,412 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { BST, Node } from "../data_structures/BST";
+import { BST } from "../data_structures/BST";
 import "../App.css";
 import "./styles/BSTQuizPage.css";
 
+const NODE_R     = 25;   // radius of visible circle
+const LEVEL_GAP  = 90;  // vertical center to center distance between levels
+const BASE_SPREAD = 150;
+const MAX_DEPTH  = 4;
+
+const nodeCY = (top) => top + NODE_R;
+
+function treeToLevelOrder(tree) {
+    if (!tree.root) return [];
+    const queue = [tree.root];
+    const result = [];
+    while (queue.length > 0) {
+        const node = queue.shift();
+        if (node) {
+            result.push(node.key);
+            queue.push(node.left  || null);
+            queue.push(node.right || null);
+        } else {
+            result.push(null);
+            queue.push(null);
+            queue.push(null);
+        }
+        if (queue.every(n => n === null)) break;
+    }
+    while (result.length && result[result.length - 1] === null) result.pop();
+    return result;
+}
+
+function getVal(arr, i) {
+    return (i < arr.length) ? arr[i] : null;
+}
+
+function levelOf(idx) {
+    return Math.floor(Math.log2(idx + 1));
+}
+
+function topOf(idx) {
+    return levelOf(idx) * LEVEL_GAP + 30;
+}
+
+function xPos(idx) {
+    if (idx === 0) return 0;
+    const parentIdx = Math.floor((idx - 1) / 2);
+    const isLeft    = idx % 2 === 1;
+    const level     = levelOf(idx);
+    const spread    = BASE_SPREAD / Math.pow(1.5, level - 1);
+    return xPos(parentIdx) + (isLeft ? -spread : spread);
+}
+
+function bstDeleteFromArray(arr, targetIdx) {
+    const a = [...arr];
+
+    function del(idx) {
+        if (idx >= a.length || a[idx] === null || a[idx] === undefined) return;
+        const left     = 2 * idx + 1;
+        const right    = 2 * idx + 2;
+        const hasLeft  = left  < a.length && a[left]  !== null && a[left]  !== undefined;
+        const hasRight = right < a.length && a[right] !== null && a[right] !== undefined;
+
+        if (!hasLeft && !hasRight) {
+            a[idx] = null;
+        } else if (hasRight) {
+            let succIdx = right;
+            while (true) {
+                const sl = 2 * succIdx + 1;
+                if (sl < a.length && a[sl] !== null && a[sl] !== undefined) succIdx = sl;
+                else break;
+            }
+            a[idx] = a[succIdx];
+            del(succIdx);
+        } else {
+            let predIdx = left;
+            while (true) {
+                const pr = 2 * predIdx + 2;
+                if (pr < a.length && a[pr] !== null && a[pr] !== undefined) predIdx = pr;
+                else break;
+            }
+            a[idx] = a[predIdx];
+            del(predIdx);
+        }
+    }
+
+    del(targetIdx);
+    while (a.length && (a[a.length - 1] === null || a[a.length - 1] === undefined)) a.pop();
+    return a;
+}
+
 function BSTQuizPage() {
-    const bstRef = useRef(new BST());
-    const [nodesArr, setNodesArr] = useState([]);
-    const [openPanels, setOpenPanels] = useState({ textInput: false, insert: false, delete: false });
+    const [nodesArr,         setNodesArr]         = useState([]);
+    const [helpOpen,         setHelpOpen]          = useState(false);
+    const [editingNodeIndex, setEditingNodeIndex]  = useState(null);
+    const [editingNodeValue, setEditingNodeValue]  = useState("");
+    const [placeholderInput, setPlaceholderInput]  = useState({});
+    const [question,         setQuestion]          = useState({});
+    const [feedbackShowing,  setFeedbackShowing]   = useState(false);
+    const [isCorrect,        setIsCorrect]         = useState(false);
+    const [answerShown,      setAnswerShown]       = useState(false);
 
-    const [textInput, setTextInput] = useState("");
-    const [insertPos, setInsertPos] = useState("");
-    const [insertVal, setInsertVal] = useState("");
-    const [deletePos, setDeletePos] = useState("");
+    const createQuestion = useCallback(() => {
+        const count = Math.floor(Math.random() * 2) + 3;
+        const arr   = Array.from({ length: count }, () => Math.floor(Math.random() * 50) + 1);
 
-    const [question, setQuestion] = useState({});
-    const [feedbackShowing, setFeedbackShowing] = useState(false);
-    const [isCorrect, setIsCorrect] = useState(false);
-    const nodesRefs = useRef([]);
+        const baseTree   = new BST();
+        arr.forEach(v => baseTree.insert(v));
+        const answerTree = new BST();
+        arr.forEach(v => answerTree.insert(v));
 
-    const togglePanel = (p) => setOpenPanels(prev => ({ ...prev, [p]: !prev[p] }));
+        const type = Math.random() < 0.5 ? "insert" : "delete";
+        let prompt, answer;
 
-    const rebuildFromArray = (arr) => {
-        if (!arr.length) {
-            bstRef.current = new BST();
-            setNodesArr([]);
-            return;
+        if (type === "insert") {
+            const value = Math.floor(Math.random() * 50) + 1;
+            answerTree.insert(value);
+            prompt = `What will the BST look like after Insert(${value})?`;
+            answer = treeToLevelOrder(answerTree);
+        } else {
+            const delVal = arr[Math.floor(Math.random() * arr.length)];
+            answerTree.treeDelete(delVal);
+            prompt = `What will the BST look like after Delete(${delVal})?`;
+            answer = treeToLevelOrder(answerTree);
         }
 
-        const nodes = arr.map(v => {
-            if (v === null || v === undefined || v === "" || isNaN(Number(v))) return null;
-            const node = new Node(Number(v));
-            node.key = Number(v);
-            return node;
-        });
+        setNodesArr(treeToLevelOrder(baseTree));
+        setQuestion({ type, prompt, answer });
+        setEditingNodeIndex(null);
+        setEditingNodeValue("");
+        setPlaceholderInput({});
+        setFeedbackShowing(false);
+        setIsCorrect(false);
+        setAnswerShown(false);
+    }, []);
 
-        for (let i = 0; i < nodes.length; i++) {
-            if (nodes[i]) {
-                const leftIdx = 2 * i + 1;
-                const rightIdx = 2 * i + 2;
-                if (leftIdx < nodes.length) nodes[i].left = nodes[leftIdx];
-                if (rightIdx < nodes.length) nodes[i].right = nodes[rightIdx];
-            }
-        }
+    useEffect(() => { createQuestion(); }, [createQuestion]);
 
-        const tree = new BST();
-        tree.root = nodes[0];
-        bstRef.current = tree;
-        setNodesArr(arr);
+    const handleSubmit = () => {
+        const trim = (a) => { const c = [...a]; while (c.length && (c[c.length-1] === null || c[c.length-1] === undefined)) c.pop(); return c; };
+        const user = trim(nodesArr);
+        const exp  = trim(question.answer || []);
+        setIsCorrect(user.length === exp.length && user.every((v, i) => v === exp[i]));
+        setFeedbackShowing(true);
     };
 
-    const treeToLevelOrder = (tree) => {
-        if (!tree.root) return [];
-        const queue = [tree.root];
-        const result = [];
+    const handleDeleteNode = (idx) => {
+        setNodesArr(bstDeleteFromArray(nodesArr, idx));
+        setPlaceholderInput({});
+        setEditingNodeIndex(null);
+    };
 
-        while (queue.length > 0) {
-            const node = queue.shift();
-            if (node) {
-                result.push(node.key);
-                queue.push(node.left);
-                queue.push(node.right);
+    const commitNodeEdit = (idx) => {
+        const val = editingNodeValue.trim();
+        if (val !== "" && !isNaN(Number(val))) {
+            const newArr = [...nodesArr];
+            newArr[idx] = Number(val);
+            setNodesArr(newArr);
+        }
+        setEditingNodeIndex(null);
+        setEditingNodeValue("");
+    };
+
+    const commitPlaceholderInsert = (idx) => {
+        const val        = (placeholderInput[idx] || "").trim();
+        const closeInput = () => setPlaceholderInput(prev => { const n = { ...prev }; delete n[idx]; return n; });
+        if (val === "" || isNaN(Number(val))) { closeInput(); return; }
+        const newArr = [...nodesArr];
+        while (newArr.length <= idx) newArr.push(null);
+        newArr[idx] = Number(val);
+        setNodesArr(newArr);
+        closeInput();
+    };
+
+    const renderTree = () => {
+        const elements = [];
+        const lines    = [];
+
+        const maxRealIdx     = nodesArr.length - 1;
+        const maxRealLevel   = maxRealIdx >= 0 ? levelOf(maxRealIdx) : 0;
+        const maxRenderLevel = Math.min(maxRealLevel + 1, MAX_DEPTH);
+
+        for (let idx = 0; idx <= maxRealIdx; idx++) {
+            const val = getVal(nodesArr, idx);
+            if (val === null || val === undefined) continue;
+
+            const level = levelOf(idx);
+            if (level >= MAX_DEPTH) continue;
+            if (level >= maxRenderLevel) continue;
+
+            const px = xPos(idx);
+            const y1 = nodeCY(topOf(idx)) + NODE_R;
+
+            const leftIdx  = 2 * idx + 1;
+            const rightIdx = 2 * idx + 2;
+
+            const yLeft  = nodeCY(topOf(leftIdx))  - NODE_R;
+            const yRight = nodeCY(topOf(rightIdx)) - NODE_R;
+
+            lines.push({ x1: px, y1, x2: xPos(leftIdx),  y2: yLeft  });
+            lines.push({ x1: px, y1, x2: xPos(rightIdx), y2: yRight });
+        }
+
+        const maxIdxToRender = Math.pow(2, maxRenderLevel + 1) - 2;
+
+        for (let idx = 0; idx <= maxIdxToRender; idx++) {
+            const level = levelOf(idx);
+            if (level > maxRenderLevel) break;
+
+            const val    = getVal(nodesArr, idx);
+            const isNull = val === null || val === undefined;
+            const cx     = xPos(idx);
+            const top    = topOf(idx);
+
+            if (!isNull) {
+                const isEditing = editingNodeIndex === idx;
+                elements.push(
+                    <div
+                        key={`node-${idx}`}
+                        className="tree-node-wrapper"
+                        style={{ left: `calc(50% + ${cx}px)`, top: `${top}px` }}
+                    >
+                        <button
+                            className="tree-node-delete-btn"
+                            title="Delete node"
+                            onClick={() => handleDeleteNode(idx)}
+                        >✕</button>
+
+                        {isEditing ? (
+                            <input
+                                className="tree-node tree-node-edit-input"
+                                value={editingNodeValue}
+                                autoFocus
+                                onChange={e => setEditingNodeValue(e.target.value)}
+                                onBlur={() => commitNodeEdit(idx)}
+                                onKeyDown={e => {
+                                    if (e.key === "Enter")  commitNodeEdit(idx);
+                                    if (e.key === "Escape") { setEditingNodeIndex(null); setEditingNodeValue(""); }
+                                }}
+                            />
+                        ) : (
+                            <div
+                                className="tree-node"
+                                title="Click to edit value"
+                                onClick={() => { setEditingNodeIndex(idx); setEditingNodeValue(String(val)); }}
+                            >
+                                {val}
+                            </div>
+                        )}
+                    </div>
+                );
             } else {
-                result.push(null);
-                queue.push(null);
-                queue.push(null);
+                if (idx === 0) {
+                    const isInputOpen = placeholderInput.hasOwnProperty(0);
+                    elements.push(
+                        <div key="placeholder-root" className="tree-node-wrapper"
+                            style={{ left: `calc(50% + 0px)`, top: `${topOf(0)}px` }}>
+                            {isInputOpen ? (
+                                <input className="tree-node tree-placeholder-input" autoFocus
+                                    value={placeholderInput[0] || ""}
+                                    onChange={e => setPlaceholderInput(prev => ({ ...prev, 0: e.target.value }))}
+                                    onBlur={() => commitPlaceholderInsert(0)}
+                                    onKeyDown={e => {
+                                        if (e.key === "Enter")  commitPlaceholderInsert(0);
+                                        if (e.key === "Escape") setPlaceholderInput(prev => { const n = { ...prev }; delete n[0]; return n; });
+                                    }}
+                                    placeholder="val" />
+                            ) : (
+                                <div className="tree-node tree-node-placeholder" title="Insert root node"
+                                    onClick={() => setPlaceholderInput(prev => ({ ...prev, 0: "" }))}>+</div>
+                            )}
+                        </div>
+                    );
+                    continue;
+                }
+
+                const parentIdx = Math.floor((idx - 1) / 2);
+                const parentVal = getVal(nodesArr, parentIdx);
+                if (parentVal === null || parentVal === undefined) continue;
+
+                const isInputOpen = placeholderInput.hasOwnProperty(idx);
+                elements.push(
+                    <div
+                        key={`placeholder-${idx}`}
+                        className="tree-node-wrapper"
+                        style={{ left: `calc(50% + ${cx}px)`, top: `${top}px` }}
+                    >
+                        {isInputOpen ? (
+                            <input
+                                className="tree-node tree-placeholder-input"
+                                autoFocus
+                                value={placeholderInput[idx] || ""}
+                                onChange={e => setPlaceholderInput(prev => ({ ...prev, [idx]: e.target.value }))}
+                                onBlur={() => commitPlaceholderInsert(idx)}
+                                onKeyDown={e => {
+                                    if (e.key === "Enter")  commitPlaceholderInsert(idx);
+                                    if (e.key === "Escape") setPlaceholderInput(prev => { const n = { ...prev }; delete n[idx]; return n; });
+                                }}
+                                placeholder="val"
+                            />
+                        ) : (
+                            <div
+                                className="tree-node tree-node-placeholder"
+                                title="Click to insert a node here"
+                                onClick={() => setPlaceholderInput(prev => ({ ...prev, [idx]: "" }))}
+                            >
+                                +
+                            </div>
+                        )}
+                    </div>
+                );
             }
-            if (queue.every(n => n === null)) break;
-        }
-        return result;
-    };
-
-    const handleTextInput = () => {
-        const values = textInput
-            .split(',')
-            .map(v => v.trim())
-            .map(v => v === 'null' ? null : Number(v));
-        if (values.some(v => v !== null && isNaN(v))) {
-            alert('Invalid input. Use integers or nulls separated by commas.');
-            return;
-        }
-        rebuildFromArray(values);
-        setTextInput('');
-    };
-
-    const handleInsert = () => {
-        const pos = Number(insertPos);
-        const val = Number(insertVal);
-
-        if (isNaN(val) || isNaN(pos) || pos < 0) {
-            alert('Invalid position or value');
-            return;
-        }
-
-        const newArr = [...nodesArr];
-        while (newArr.length < pos) {
-            newArr.push(null);
-        }
-        newArr[pos] = val;
-
-        rebuildFromArray(newArr);
-        setInsertPos('');
-        setInsertVal('');
-    };
-
-    const handleDelete = () => {
-        const pos = Number(deletePos);
-        if (pos < 0 || pos >= nodesArr.length) {
-            alert('Invalid index');
-            return;
-        }
-        const newArr = nodesArr;
-        newArr[pos] = null;
-        rebuildFromArray(newArr);
-        setDeletePos('');
-    };
-
-    const updateNodesArrAfterEdit = (i, newVal) => {
-        const val = Number(newVal);
-        if (isNaN(val)) return;
-        const newArr = [...nodesArr];
-        newArr[i] = val;
-        rebuildFromArray(newArr);
-    };
-
-    const renderTree = (node, x = 0, y = 0, level = 0, spacing = 220, lines = []) => {
-        if (!node) return { elements: [], lines };
-        const offset = spacing / Math.pow(2, level);
-        const cx = x, cy = y;
-
-        const displayVal = node.key !== undefined && node.key !== null ? node.key : "";
-        const elements = [
-            <div
-                key={`${cx}-${cy}`}
-                className="tree-node"
-                style={{ left: `calc(50% + ${cx}px)`, top: `${cy}px` }}
-            >
-                {displayVal}
-            </div>
-        ];
-
-        if (node.left) {
-            const lx = x - offset;
-            const ly = y + 100;
-            lines.push({ x1: cx, y1: cy, x2: lx, y2: ly });
-            const left = renderTree(node.left, lx, ly, level + 1, spacing, lines);
-            elements.push(...left.elements);
-        }
-
-        if (node.right) {
-            const rx = x + offset;
-            const ry = y + 100;
-            lines.push({ x1: cx, y1: cy, x2: rx, y2: ry });
-            const right = renderTree(node.right, rx, ry, level + 1, spacing, lines);
-            elements.push(...right.elements);
         }
 
         return { elements, lines };
     };
 
-    const generateRandomArray = () =>
-        Array.from({ length: Math.floor(Math.random() * 2) + 3 }, () => Math.floor(Math.random() * 50) + 1);
+    const { elements, lines } = renderTree();
 
-    const createQuestion = useCallback(() => {
-        const arr = generateRandomArray();
-        const baseTree = new BST();
-        arr.forEach(v => baseTree.insert(v));
+    const HelpModal = () => (
+        <div className="help-modal-backdrop" onClick={() => setHelpOpen(false)}>
+            <div className="help-modal" onClick={e => e.stopPropagation()}>
+                <div className="help-modal-header">
+                    <h2>How to use the BST Quiz</h2>
+                    <button className="help-modal-close" onClick={() => setHelpOpen(false)}>✕</button>
+                </div>
+                <div className="help-modal-body">
+                    <p>Edit the tree on the left to match what it looks like after the operation in the question.</p>
+                    <h4>How to edit the tree:</h4>
+                    <ul className="help-list">
+                        <li><strong>Insert a node:</strong> Click a dashed <strong>+</strong> circle where a child could go. Type the value and press <kbd>Enter</kbd>.</li>
+                        <li><strong>Delete a node:</strong> Hover a node and click X above it. The in-order successor (right-child) or predecessor (if no right child) is promoted automatically.</li>
+                        <li><strong>Edit a value:</strong> Click a node's number to edit it in place. Press <kbd>Enter</kbd> to confirm.</li>
+                    </ul>
+                    <p className="help-note">Tip: When deleting a node sometimes the display will automatically update, this is not always correct. It is up to the user to ensure the tree is correct after a Delete operation.</p>
+                </div>
+            </div>
+        </div>
+    );
 
-        const answerTree = new BST();
-        arr.forEach(v => answerTree.insert(v));
-
-        const type = Math.random() < 0.5 ? "insert" : "delete";
-        let questionObj = {};
-        const value = Math.floor(Math.random() * 50) + 1;
-
-        if (type === "insert") {
-            answerTree.insert(value);
-            questionObj = {
-                type,
-                prompt: `Insert ${value} into the BST.`,
-                value,
-                list: treeToLevelOrder(baseTree),
-                answer: treeToLevelOrder(answerTree)
-            };
-        } else {
-            const delVal = arr[Math.floor(Math.random() * arr.length)];
-            answerTree.treeDelete(delVal);
-            questionObj = {
-                type,
-                prompt: `Delete ${delVal} from the BST.`,
-                value: delVal,
-                list: treeToLevelOrder(baseTree),
-                answer: treeToLevelOrder(answerTree)
-            };
-        }
-
-        bstRef.current = baseTree;
-        setNodesArr(treeToLevelOrder(baseTree));
-        setQuestion(questionObj);
-    }, []);
-
-    useEffect(() => {
-        createQuestion();
-    }, [createQuestion]);
-
-    const handleSubmit = () => {
-        const trimNulls = (arr) => {
-            const copy = [...arr];
-            while (copy.length && (copy[copy.length - 1] === null || copy[copy.length - 1] === undefined)) {
-                copy.pop();
-            }
-            return copy;
-        };
-
-        const userAnswer = trimNulls(nodesArr);
-        const expected = trimNulls(question.answer);
-
-        const equal = userAnswer.length === expected.length && userAnswer.every((v, i) => v === expected[i]);
-        setIsCorrect(equal);
-        setFeedbackShowing(true);
+    const handleShowAnswer = () => {
+        setNodesArr([...(question.answer || [])]);
+        setAnswerShown(true);
+        setFeedbackShowing(false);
+        setEditingNodeIndex(null);
+        setPlaceholderInput({});
     };
 
     const AnswerFeedback = () => feedbackShowing && (
         <div className="answer-feedback-popup quiz-overlay">
             <div className="popup-content">
                 <h3 className={isCorrect ? "correct-text" : "incorrect-text"}>
-                    {isCorrect ? "Correct" : "Incorrect"}
+                    {isCorrect ? "Correct!" : "Incorrect"}
                 </h3>
-                <button
-                    className="quiz-button"
-                    onClick={() => {
-                        setFeedbackShowing(false);
-                        if (isCorrect) createQuestion();
-                    }}
-                >
-                    Close
+                <button className="quiz-button" onClick={() => { setFeedbackShowing(false); if (isCorrect) createQuestion(); }}>
+                    {isCorrect ? "Next Question" : "Try Again"}
                 </button>
+                {!isCorrect && (
+                    <button className="quiz-button" style={{ marginTop: "0.5rem" }}
+                        onClick={() => { setFeedbackShowing(false); createQuestion(); }}>
+                        New Question
+                    </button>
+                )}
+                {!isCorrect && (
+                    <button className="quiz-button show-answer-btn" style={{ marginTop: "0.5rem" }}
+                        onClick={handleShowAnswer}>
+                        Show Answer
+                    </button>
+                )}
             </div>
         </div>
     );
 
-    const { elements, lines } = bstRef.current.root
-        ? renderTree(bstRef.current.root)
-        : { elements: [], lines: [] };
-
     return (
         <div className="quiz-page">
-
             <h1 className="page-title">Binary Search Tree Quiz</h1>
-            <Link to="/" className="back-icon">
-                <img src="/favicon.ico" alt="Home" />
-            </Link>
+            <Link to="/" className="back-icon"><img src="/favicon.ico" alt="Home" /></Link>
+
+            {helpOpen && <HelpModal />}
 
             <div className="bst-content">
                 <div className="visualization-area">
+                    <p className="interaction-hint">
+                        Click <strong>+</strong> on an empty slot to insert · Hover a node and click X to delete · Click a value to edit it
+                    </p>
+                    {answerShown && (
+                        <p className="answer-shown-banner">Showing correct answer</p>
+                    )}
                     <div className="tree-container">
-                        <svg className="tree-lines">
-                            {lines.map((l, i) => (
-                                <line
-                                    key={i}
-                                    x1={`calc(50% + ${l.x1}px)`}
-                                    y1={l.y1 + 25}
-                                    x2={`calc(50% + ${l.x2}px)`}
-                                    y2={l.y2}
-                                    stroke="#F0F6FC"
-                                    strokeWidth="2"
-                                />
-                            ))}
-                        </svg>
-                        <div className="tree-layout">{elements}</div>
-                    </div>
-
-                    <div className="visual-edits">
-                        <div className="inorder-header">In-order display</div>
-                        
-                        <div className="node-container">
-                            {nodesArr.map((v, i) => (
-                                <div
-                                    key={i}
-                                    ref={el => nodesRefs.current[i] = el}
-                                    className="node-box"
-                                    contentEditable={true}
-                                    suppressContentEditableWarning
-                                    onInput={(e) => updateNodesArrAfterEdit(i, e.currentTarget.textContent.trim())}
-                                    onKeyDown={(e) => {
-                                        if (e.key === "Enter") {
-                                            e.preventDefault();
-                                            e.currentTarget.blur();
-                                        }
-                                    }}
-                                    onBlur={(e) => updateNodesArrAfterEdit(i, e.target.textContent.trim())}
-                                >
-                                    {v}
-                                </div>
-                            ))}
+                        <div className="tree-layout">
+                            <svg className="tree-lines">
+                                {lines.map((l, i) => (
+                                    <line key={i}
+                                        x1={`calc(50% + ${l.x1 - 25}px)`} y1={l.y1}
+                                        x2={`calc(50% + ${l.x2 - 25}px)`} y2={l.y2}
+                                        stroke="#444c56" strokeWidth="2"
+                                    />
+                                ))}
+                            </svg>
+                            {elements}
                         </div>
-                    </div>
-                </div>
-
-                <div className="side-actions">
-                    <div className="panel actions-panel">
-                        <div className="panel-header" onClick={() => togglePanel('textInput')}>
-                            <div className={`triangle-icon ${openPanels.textInput ? 'open' : ''}`}></div>
-                            <h3>Text Input</h3>
-                        </div>
-                        {openPanels.textInput && (
-                            <div className="panel-body actions-body">
-                                <input
-                                    type="text"
-                                    placeholder="Type list: 1,2,3"
-                                    value={textInput}
-                                    onChange={(e) => setTextInput(e.target.value)}
-                                />
-                                <button className="actions-button" onClick={handleTextInput}>Update List</button>
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="panel actions-panel">
-                        <div className="panel-header" onClick={() => togglePanel('insert')}>
-                            <div className={`triangle-icon ${openPanels.insert ? 'open' : ''}`}></div>
-                            <h3>New Node</h3>
-                        </div>
-                        {openPanels.insert && (
-                            <div className="panel-body actions-body">
-                                <input
-                                    type="text"
-                                    placeholder="Position"
-                                    value={insertPos}
-                                    onChange={(e) => setInsertPos(e.target.value)}
-                                />
-                                <input
-                                    type="text"
-                                    placeholder="Value"
-                                    value={insertVal}
-                                    onChange={(e) => setInsertVal(e.target.value)}
-                                />
-                                <button className="actions-button" onClick={handleInsert}>Insert</button>
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="panel actions-panel">
-                        <div className="panel-header" onClick={() => togglePanel('delete')}>
-                            <div className={`triangle-icon ${openPanels.delete ? 'open' : ''}`}></div>
-                            <h3>Delete Node</h3>
-                        </div>
-                        {openPanels.delete && (
-                            <div className="panel-body actions-body">
-                                <input
-                                    type="text"
-                                    placeholder="Position"
-                                    value={deletePos}
-                                    onChange={(e) => setDeletePos(e.target.value)}
-                                />
-                                <button className="actions-button" onClick={handleDelete}>Delete</button>
-                            </div>
-                        )}
-                    </div>
-
-                    <div className={`panel help-panel ${openPanels.help ? "help-open" : ""}`}>
-                        <div
-                            className="panel-header"
-                            onClick={() => togglePanel("help")}
-                        >
-                            <div
-                                className={`triangle-icon ${openPanels.help ? "open" : ""}`}
-                            ></div>
-                            <h3>Help</h3>
-                        </div>
-                        <div className={`panel help-panel ${openPanels.help ? "help-open" : ""}`}></div>
-                        {openPanels.help && (
-                            <div className="panel-body help-body">
-                                <div className="help-text" aria-hidden="true">
-                                    <p>
-                                    The quiz question on the right asks you to perform an operation as if you 
-                                    were the BST function. For example, <strong>Insert(5)</strong> means to determine how the
-                                    tree will look after the operation and make the tree on the left match that
-                                    state.
-                                    </p>
-
-                                    <h4>There are three ways to edit the tree:</h4>
-
-                                    <ul className="help-list">
-                                        <li>
-                                        <strong>Text Input</strong>: Type a level-order array separated by comma-separated values. Use <code>null</code> for empty nodes.
-                                        Example: <code>10, 5, 15, null, 7</code> represents a tree where 10 is root, left child is 5 (which has no left child),
-                                        and right child is 15. 5's right child is 7.
-                                        </li>
-
-                                        <li>
-                                        <strong>Actions</strong>: Use the <em>Insert Node</em> and <em>Delete Node</em> dropdowns:
-                                        <ul>
-                                            <li><strong>Insert:</strong> supply the level-order index where the new node should appear and the new value.</li>
-                                            <li><strong>Delete:</strong> supply the level-order index to set to <code>null</code>.</li>
-                                        </ul>
-                                        </li>
-
-                                        <li>
-                                        <strong>Live Editing</strong>: You can also edit the level-order display directly by clicking a node box
-                                        and changing its number. Changes update the tree visualization.
-                                        </li>
-                                    </ul>
-
-                                    <p className="help-note">
-                                        Tip: indices are 0-based (the tree root has index <code>0</code>). If the question says 
-                                        <strong> Insert(5)</strong>, decide where 5 belongs in the tree, convert that to level-order, then use either Text Input or
-                                        Actions to create that final list. Note that null nodes still receive an index if there are 
-                                        non-null nodes after. The tree <code>10, 5, 15, null, 7</code> has <code>node_4</code> with <code>val=7</code>.
-                                    </p>
-                                    </div>
-                            </div>
-                        )}
                     </div>
                 </div>
 
                 <div className="quiz-container">
                     <p className="quiz-title">{question.prompt}</p>
+                    <button className="help-btn" onClick={() => setHelpOpen(true)}>? Help</button>
                     <div className="quiz-navigation">
                         <button className="quiz-button" onClick={handleSubmit}>Submit</button>
                         <button className="quiz-button" onClick={createQuestion}>New Question</button>

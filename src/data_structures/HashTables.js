@@ -1,9 +1,3 @@
-// HashTables.js
-// Two implementations converted from the uploaded file:
-//  - LinearProbingHashTable: open addressing with linear probing + tombstones
-//  - ChainingHashTable: separate chaining (arrays as chains)
-// Both accept numeric-ish keys (coerced to Number) like the original.
-
 class LPEntry {
   constructor({ id, key, value }) {
     this.id = id ?? null;
@@ -16,11 +10,10 @@ class LinearProbingHashTable {
   constructor(initialSize = 7) {
     this.size = initialSize;
     this.buckets = Array.from({ length: this.size }, () => null);
-    // tombstone marker (distinct object)
     this._TOMBSTONE = { __tombstone: true };
-    this._count = 0; // number of actual entries (not counting tombstones)
+    this._count = 0;
     this._nextId = 1;
-    this._maxLoad = 0.6; // resize threshold
+    this._maxLoad = 0.75; // resize threshold
   }
 
   _hash(key) {
@@ -39,94 +32,54 @@ class LinearProbingHashTable {
     this._count = 0;
     for (const slot of old) {
       if (slot && slot !== this._TOMBSTONE) {
-        this.insert(slot.key, slot.value, slot.id); // preserve id if present
+        this.insert(slot.key, slot.value, slot.id);
       }
     }
   }
 
-  // insert: if idProvided passed, preserves it (used during rehash)
   insert(key, value, idProvided = null) {
-  const k = Number(key);
-  const v = value;
+    const k = Number(key);
+    const v = value;
 
-  // Probe to find if key exists, and track first tombstone
-  let idx = this._hash(k);
-  let start = idx;
-  let firstTombstone = -1;
+    let idx = this._hash(k);
+    const start = idx;
+    let firstTombstone = -1;
 
-  while (true) {
-    const slot = this.buckets[idx];
-    if (slot === null) {
-      // reached empty slot -> key not present
-      break;
-    }
-    if (slot === this._TOMBSTONE) {
-      if (firstTombstone === -1) firstTombstone = idx;
-    } else if (slot.key === k) {
-      // key already present -> update and return
-      slot.value = v;
-      return { type: "update", index: idx, entry: slot };
-    }
-    idx = (idx + 1) % this.size;
-    if (idx === start) break; // table fully probed
-  }
-
-  // We're going to insert a new key. Only now check whether insertion would
-  // exceed the load threshold and require a resize.
-  if ((this._count + 1) / this.size > this._maxLoad) {
-    this._resizeAndRehash();
-    // recompute probe start after resize
-    idx = this._hash(k);
-    start = idx;
-    firstTombstone = -1;
     while (true) {
       const slot = this.buckets[idx];
-      if (slot === null) break;
+      if (slot === null) {
+        break;
+      }
       if (slot === this._TOMBSTONE) {
         if (firstTombstone === -1) firstTombstone = idx;
+      } else if (slot.key === k) {
+        slot.value = v;
+        return { type: "update", index: idx, entry: slot };
       }
       idx = (idx + 1) % this.size;
       if (idx === start) break;
     }
-  } else {
-    // reset idx to original hash to find insertion spot (we may have walked above)
-    idx = this._hash(k);
-  }
 
-  // Find final insertion index: prefer the first tombstone we saw, otherwise
-  // the first null slot we encounter.
-  let place = -1;
-  start = idx;
-  while (true) {
-    const slot = this.buckets[idx];
-    if (slot === null) {
-      place = firstTombstone !== -1 ? firstTombstone : idx;
-      break;
+    if ((this._count + 1) / this.size > this._maxLoad) {
+      this._resizeAndRehash();
+      // After resize the table layout changed entirely — re-run insert from scratch.
+      return this.insert(key, value, idProvided);
     }
-    if (slot === this._TOMBSTONE && firstTombstone === -1) {
-      firstTombstone = idx;
-    }
-    idx = (idx + 1) % this.size;
-    if (idx === start) break;
+
+    // Insertion point: reuse the earliest tombstone if we saw one,
+    // otherwise use the null slot idx stopped at.
+    const place = firstTombstone !== -1 ? firstTombstone : idx;
+
+    const e = new LPEntry({
+      id: idProvided ?? this._nextId++,
+      key: k,
+      value: v,
+    });
+
+    this.buckets[place] = e;
+    this._count++;
+    return { type: "insert", index: place, entry: e };
   }
-
-  // Defensive fallback: if somehow we still couldn't place (shouldn't happen),
-  // rehash and try again.
-  if (place === -1) {
-    this._resizeAndRehash();
-    return this.insert(key, value, idProvided);
-  }
-
-  const e = new LPEntry({
-    id: idProvided ?? this._nextId++,
-    key: k,
-    value: v,
-  });
-
-  this.buckets[place] = e;
-  this._count++;
-  return { type: "insert", index: place, entry: e };
-}
 
 
   search(key) {
@@ -285,14 +238,11 @@ class ChainingHashTable {
     return null;
   }
 
-  // returns array-of-arrays snapshot (for debugging / visualization)
-  // Each element is a plain object { key, value, id } in head-first order.
   toBucketsArray() {
     const res = Array.from({ length: this.size }, () => []);
     for (let i = 0; i < this.size; i++) {
       let cur = this.buckets[i];
       while (cur) {
-        // push plain serializable object (UI expects this)
         res[i].push({ key: cur.key, value: cur.value, id: cur.id });
         cur = cur.next;
       }

@@ -8,27 +8,70 @@ function verifyInput(value) {
     return !Number.isInteger(Number(value)) || value === "" || value.includes(".");
 }
 
+function InsertGap({ gapIndex, activeInsertGap, insertInputVal, insertInputRef, onActivate, onChangeVal, onCommit, onCancel }) {
+    const isActive = activeInsertGap === gapIndex;
+    return (
+        <div className="insert-gap">
+            {isActive ? (
+                <div className="insert-gap-input-wrapper">
+                    <input
+                        ref={insertInputRef}
+                        className="insert-gap-input"
+                        type="text"
+                        placeholder="val"
+                        value={insertInputVal}
+                        onChange={(e) => onChangeVal(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter") onCommit();
+                            if (e.key === "Escape") onCancel();
+                        }}
+                        onBlur={() => {
+                            setTimeout(onCancel, 150);
+                        }}
+                    />
+                    <button
+                        className="insert-gap-confirm"
+                        onMouseDown={(e) => { e.preventDefault(); onCommit(); }}
+                    >
+                        ✓
+                    </button>
+                </div>
+            ) : (
+                <button
+                    className="insert-gap-btn"
+                    title="Insert node here"
+                    onClick={() => onActivate(gapIndex)}
+                >
+                    +
+                </button>
+            )}
+        </div>
+    );
+}
+
 function LinkedListQuizPage() {
     const displayList = useRef(new LinkedList());
     const [nodes, setNodes] = useState([]);
 
-    const [insertPos, setInsertPos] = useState("");
-    const [insertVal, setInsertVal] = useState("");
-    const [deletePos, setDeletePos] = useState("");
-    const [textInput, setTextInput] = useState("");
-    const [openPanels, setOpenPanels] = useState({
-        textInput: false,
-        insert: false,
-        delete: false,
-        help: false
-    });
+    const [helpOpen, setHelpOpen] = useState(false);
+
+    const [activeInsertGap, setActiveInsertGap] = useState(null);
+    const [insertInputVal, setInsertInputVal] = useState("");
+    const insertInputRef = useRef(null);
+
+    const [editingIndex, setEditingIndex] = useState(null);
+    const nodesRefs = useRef([]);
 
     const [question, setQuestion] = useState({});
     const [feedbackShowing, setFeedbackShowing] = useState(false);
     const [isCorrect, setIsCorrect] = useState(false);
+    const [answerShown, setAnswerShown] = useState(false);
 
-    const [editingIndex, setEditingIndex] = useState(null);
-    const nodesRefs = useRef([]);
+    useEffect(() => {
+        if (activeInsertGap !== null && insertInputRef.current) {
+            insertInputRef.current.focus();
+        }
+    }, [activeInsertGap]);
 
     useEffect(() => {
         if (editingIndex === null) return;
@@ -44,13 +87,6 @@ function LinkedListQuizPage() {
         }
     }, [editingIndex]);
 
-    const togglePanel = (panel) => {
-        setOpenPanels((prev) => ({
-            ...prev,
-            [panel]: !prev[panel]
-        }));
-    };
-
     const generateRandomList = () => {
         const length = Math.floor(Math.random() * 4) + 2;
         return Array.from({ length }, () => Math.floor(Math.random() * 9) + 1);
@@ -59,7 +95,6 @@ function LinkedListQuizPage() {
     const createQuestion = useCallback(() => {
         const list = generateRandomList();
         const type = Math.random() < 0.5 ? "insert" : "delete";
-        const pos = Math.floor(Math.random() * list.length);
         let answer;
         let val;
 
@@ -76,20 +111,23 @@ function LinkedListQuizPage() {
 
         setQuestion({
             type,
-            position: pos,
             value: val,
             list,
             answer,
             prompt:
                 type === "insert"
-                    ? `Edit the LinkedList as if Insert(${val}) was ran`
-                    : `Edit the LinkedList as if Delete(${val}) was ran`
+                    ? `What will the linked list look like after Insert(${val})?`
+                    : `What will the linked list look like after Delete(${val})?`
         });
 
         const newList = new LinkedList();
         for (let i = list.length - 1; i >= 0; i--) newList.insert(list[i]);
         displayList.current = newList;
         setNodes(newList.toArray());
+        setActiveInsertGap(null);
+        setInsertInputVal("");
+        setEditingIndex(null);
+        setAnswerShown(false);
     }, []);
 
     useEffect(() => {
@@ -98,60 +136,46 @@ function LinkedListQuizPage() {
 
     const updateNodes = () => setNodes(displayList.current.toArray());
 
-    const handleTextInput = () => {
-        const values = textInput
-            .split(",")
-            .map((val) => val.trim())
-            .filter((val) => val !== "")
-            .map(Number);
-        if (values.some(isNaN)) {
-            alert("Only enter integers separated by commas (e.g. 1, 2, 3)");
-            return;
+    const activeInsertGapRef = useRef(activeInsertGap);
+    const insertInputValRef = useRef(insertInputVal);
+    useEffect(() => { activeInsertGapRef.current = activeInsertGap; }, [activeInsertGap]);
+    useEffect(() => { insertInputValRef.current = insertInputVal; }, [insertInputVal]);
+
+    const commitInsert = useCallback(() => {
+        const currentGap = activeInsertGapRef.current;
+        const currentVal = insertInputValRef.current.trim();
+        if (currentGap === null) return;
+        if (!verifyInput(currentVal)) {
+            const numVal = Number(currentVal);
+            const arr = displayList.current.toArray();
+            const newArr = [...arr];
+            newArr.splice(currentGap, 0, numVal);
+            const newList = new LinkedList();
+            for (let i = newArr.length - 1; i >= 0; i--) newList.insert(newArr[i]);
+            displayList.current = newList;
+            setNodes(newArr);
         }
+        setActiveInsertGap(null);
+        setInsertInputVal("");
+    }, []);
 
-        const newList = new LinkedList();
-        for (let i = values.length - 1; i >= 0; i--) newList.insert(values[i]);
-        displayList.current = newList;
-        setNodes(newList.toArray());
-        setTextInput("");
-    };
+    const cancelInsert = useCallback(() => {
+        setActiveInsertGap(null);
+        setInsertInputVal("");
+    }, []);
 
-    const handleInsert = () => {
-        const pos = Number(insertPos);
-        const val = Number(insertVal);
+    const activateGap = useCallback((gapIndex) => {
+        setActiveInsertGap(gapIndex);
+        setInsertInputVal("");
+    }, []);
+
+    const handleDeleteNode = (index) => {
         const arr = displayList.current.toArray();
-
-        if (isNaN(pos) || isNaN(val) || pos < 0 || pos > arr.length) {
-            alert("Invalid position or value");
-            return;
-        }
-
-        const newArr = [...arr];
-        newArr.splice(pos, 0, val);
-
+        const newArr = arr.filter((_, i) => i !== index);
         const newList = new LinkedList();
         for (let i = newArr.length - 1; i >= 0; i--) newList.insert(newArr[i]);
         displayList.current = newList;
         updateNodes();
-        setInsertPos("");
-        setInsertVal("");
-    };
-
-    const handleDelete = () => {
-        const pos = Number(deletePos);
-        const arr = displayList.current.toArray();
-
-        if (isNaN(pos) || pos < 0 || pos >= arr.length) {
-            alert("Invalid position");
-            return;
-        }
-
-        const newArr = arr.filter((_, i) => i !== pos);
-        const newList = new LinkedList();
-        for (let i = newArr.length - 1; i >= 0; i--) newList.insert(newArr[i]);
-        displayList.current = newList;
-        updateNodes();
-        setDeletePos("");
     };
 
     const handleSubmit = () => {
@@ -160,9 +184,54 @@ function LinkedListQuizPage() {
         const equal =
             userAnswer.length === expected.length &&
             userAnswer.every((v, i) => v === expected[i]);
-
         setIsCorrect(equal);
         setFeedbackShowing(true);
+    };
+
+    const HelpModal = () => (
+        <div className="help-modal-backdrop" onClick={() => setHelpOpen(false)}>
+            <div className="help-modal" onClick={(e) => e.stopPropagation()}>
+                <div className="help-modal-header">
+                    <h2>How to use the Linked List Quiz</h2>
+                    <button className="help-modal-close" onClick={() => setHelpOpen(false)}>✕</button>
+                </div>
+                <div className="help-modal-body">
+                    <p>
+                        The quiz question asks you to perform an operation on the linked list.
+                        Edit the visualization on the left to match what the list looks like after the operation runs.
+                    </p>
+                    <h4>How to edit the list:</h4>
+                    <ul className="help-list">
+                        <li>
+                            <strong>Insert a node:</strong> Click any <strong>+</strong> button
+                            between (or before/after) nodes to open an inline input. Type a value
+                            and press <kbd>Enter</kbd> or click the checkmark.
+                        </li>
+                        <li>
+                            <strong>Delete a node:</strong> Hover over a node and click the
+                            X button that appears above it.
+                        </li>
+                        <li>
+                            <strong>Edit a value:</strong> Click the node's number to edit it
+                            in place. Press <kbd>Enter</kbd> or click away to confirm.
+                        </li>
+                    </ul>
+                    <p className="help-note">
+                        Tip: For <strong>Insert(V)</strong>, a linked list inserts at the head by
+                        default. Use the <strong>+</strong> at the very beginning to prepend.
+                    </p>
+                </div>
+            </div>
+        </div>
+    );
+
+    const handleShowAnswer = () => {
+        const newList = new LinkedList();
+        for (let i = question.answer.length - 1; i >= 0; i--) newList.insert(question.answer[i]);
+        displayList.current = newList;
+        setNodes([...question.answer]);
+        setAnswerShown(true);
+        setFeedbackShowing(false);
     };
 
     const AnswerFeedback = () =>
@@ -170,7 +239,7 @@ function LinkedListQuizPage() {
             <div className="answer-feedback-popup quiz-overlay">
                 <div className="popup-content">
                     <h3 className={isCorrect ? "correct-text" : "incorrect-text"}>
-                        {isCorrect ? "Correct" : "Incorrect"}
+                        {isCorrect ? "Correct!" : "Incorrect"}
                     </h3>
                     <button
                         onClick={() => {
@@ -179,212 +248,131 @@ function LinkedListQuizPage() {
                         }}
                         className="quiz-button"
                     >
-                        Close
+                        {isCorrect ? "Next Question" : "Try Again"}
                     </button>
+                    {!isCorrect && (
+                        <button
+                            onClick={() => {
+                                setFeedbackShowing(false);
+                                createQuestion();
+                            }}
+                            className="quiz-button"
+                            style={{ marginTop: "0.5rem" }}
+                        >
+                            New Question
+                        </button>
+                    )}
+                    {!isCorrect && (
+                        <button
+                            onClick={handleShowAnswer}
+                            className="quiz-button show-answer-btn"
+                            style={{ marginTop: "0.5rem" }}
+                        >
+                            Show Answer
+                        </button>
+                    )}
                 </div>
             </div>
         );
 
     return (
         <div className="quiz-page">
-
             <h1 className="page-title">Linked List Quiz</h1>
             <Link to="/" className="back-icon">
                 <img src="/favicon.ico" alt="Back" />
             </Link>
 
+            {helpOpen && <HelpModal />}
+
             <div className="linkedlist-content">
                 <div className="visualization-area">
-                    <div className="node-container">
-                        {nodes.map((value, index) => (
-                            <React.Fragment key={index}>
-                                <div
-                                    ref={(el) => (nodesRefs.current[index] = el)}
-                                    className="node-box"
-                                    contentEditable={editingIndex === index}
-                                    suppressContentEditableWarning={true}
-                                    onClick={() => setEditingIndex(index)}
-                                    onBlur={(e) => {
-                                        const newVal = e.target.textContent.trim();
+                    <p className="interaction-hint">
+                        Click <strong>+</strong> to insert a node · Click X on a node to delete it · Click a node value to edit it
+                    </p>
+                    {answerShown && (
+                        <p className="answer-shown-banner">Showing correct answer</p>
+                    )}
 
-                                        if (verifyInput(newVal)) {
-                                            e.target.textContent = nodes[index];
-                                            alert("Enter a valid integer");
-                                            setEditingIndex(null);
-                                            return;
-                                        }
+                    <div className="node-scroll-wrapper">
+                        <div className="node-container">
+                            <InsertGap
+                                gapIndex={0}
+                                activeInsertGap={activeInsertGap}
+                                insertInputVal={insertInputVal}
+                                insertInputRef={insertInputRef}
+                                onActivate={activateGap}
+                                onChangeVal={setInsertInputVal}
+                                onCommit={commitInsert}
+                                onCancel={cancelInsert}
+                            />
 
-                                        const oldKey = nodes[index];
-                                        const tempNode = displayList.current.search(oldKey);
-                                        if (tempNode) tempNode.key = Number(newVal);
-                                        updateNodes();
-                                        setEditingIndex(null);
-                                    }}
-                                    onKeyDown={(e) => {
-                                        if (e.key === "Enter") {
-                                            e.preventDefault();
-                                            e.target.blur();
-                                        }
-                                    }}
-                                >
-                                    {value}
-                                </div>
-                                {index < nodes.length - 1 && <div className="arrow">→</div>}
-                            </React.Fragment>
-                        ))}
-                    </div>
-                </div>
-
-                <div className="side-actions">
-                    <div className="panel actions-panel">
-                        <div
-                            className="panel-header"
-                            onClick={() => togglePanel("textInput")}
-                        >
-                            <div
-                                className={`triangle-icon ${openPanels.textInput ? "open" : ""}`}
-                            ></div>
-                            <h3>Text Input</h3>
-                        </div>
-                        {openPanels.textInput && (
-                            <div className="panel-body actions-body">
-                                <input
-                                    type="text"
-                                    placeholder="Type list: 1, 2, 3"
-                                    value={textInput}
-                                    onChange={(e) => setTextInput(e.target.value)}
-                                />
-                                <button
-                                    className="actions-button"
-                                    onClick={handleTextInput}
-                                >
-                                    Update List
-                                </button>
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="panel actions-panel">
-                        <div
-                            className="panel-header"
-                            onClick={() => togglePanel("insert")}
-                        >
-                            <div
-                                className={`triangle-icon ${openPanels.insert ? "open" : ""}`}
-                            ></div>
-                            <h3>New Node</h3>
-                        </div>
-                        {openPanels.insert && (
-                            <div className="panel-body actions-body">
-                                <input
-                                    type="text"
-                                    placeholder="Position"
-                                    value={insertPos}
-                                    onChange={(e) => setInsertPos(e.target.value)}
-                                />
-                                <input
-                                    type="text"
-                                    placeholder="Value"
-                                    value={insertVal}
-                                    onChange={(e) => setInsertVal(e.target.value)}
-                                />
-                                <button
-                                    className="actions-button"
-                                    onClick={handleInsert}
-                                >
-                                    Insert
-                                </button>
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="panel actions-panel">
-                        <div
-                            className="panel-header"
-                            onClick={() => togglePanel("delete")}
-                        >
-                            <div
-                                className={`triangle-icon ${openPanels.delete ? "open" : ""}`}
-                            ></div>
-                            <h3>Delete Node</h3>
-                        </div>
-                        {openPanels.delete && (
-                            <div className="panel-body actions-body">
-                                <input
-                                    type="text"
-                                    placeholder="Position"
-                                    value={deletePos}
-                                    onChange={(e) => setDeletePos(e.target.value)}
-                                />
-                                <button
-                                    className="actions-button"
-                                    onClick={handleDelete}
-                                >
-                                    Delete
-                                </button>
-                            </div>
-                        )}
-                    </div>
-
-                    <div className={`panel help-panel ${openPanels.help ? "help-open" : ""}`}>
-                        <div
-                            className="panel-header"
-                            onClick={() => togglePanel("help")}
-                        >
-                            <div
-                                className={`triangle-icon ${openPanels.help ? "open" : ""}`}
-                            ></div>
-                            <h3>Help</h3>
-                        </div>
-                        <div className={`panel help-panel ${openPanels.help ? "help-open" : ""}`}></div>
-                        {openPanels.help && (
-                            <div className="panel-body help-body">
-                                <div className="help-text" aria-hidden="true">
-                                    <p>
-                                        The quiz question on the right asks you to perform an operation as if you were the
-                                        linked-list function. For example, <strong>Insert(5)</strong> means to determine how the
-                                        linked list will look after the operation and make the linked list on the left match that
-                                        state.
-                                    </p>
-
-                                    <h4>There are three ways to edit the list:</h4>
-
-                                    <ul className="help-list">
-                                        <li>
-                                        <strong>Text Input</strong>: Type the entire list as comma-separated values and click 
-                                        <kbd> Update List</kbd>. For example:
-                                        <div className="example"><code>1, 2, 3</code></div>
-                                        This represents node_0 = 1 → node_1 = 2 → node_2 = 3 → Null.
-                                        </li>
-
-                                        <li>
-                                        <strong>Actions</strong>: Use the <em>Insert Node</em> and <em>Delete Node</em> dropdowns:
-                                        <ul>
-                                            <li><strong>Insert:</strong> supply the index where the new value should appear and the value.</li>
-                                            <li><strong>Delete:</strong> supply the index of the node to remove.</li>
-                                        </ul>
-                                        </li>
-
-                                        <li>
-                                        <strong>Live Editing</strong>: Click a node in the visualization and edit its numeric value directly.
-                                        Press <kbd>Enter</kbd> or click outside the node to commit.
-                                        </li>
-                                    </ul>
-
-                                    <p className="help-note">
-                                        Tip: indices are 0-based (the head has index <code>0</code>). If the question says 
-                                        <strong> Insert(5)</strong>, decide where 5 belongs in the list order, then use either Text Input or
-                                        Actions to create that final list.
-                                    </p>
+                            {nodes.map((value, index) => (
+                                <React.Fragment key={index}>
+                                    <div className="node-wrapper">
+                                        <button
+                                            className="node-delete-btn"
+                                            title="Delete this node"
+                                            onClick={() => handleDeleteNode(index)}
+                                        >
+                                            ✕
+                                        </button>
+                                        <div
+                                            ref={(el) => (nodesRefs.current[index] = el)}
+                                            className={`node-box ${editingIndex === index ? "editing" : ""}`}
+                                            contentEditable={editingIndex === index}
+                                            suppressContentEditableWarning={true}
+                                            onClick={() => {
+                                                if (activeInsertGap !== null) return;
+                                                setEditingIndex(index);
+                                            }}
+                                            onBlur={(e) => {
+                                                const newVal = e.target.textContent.trim();
+                                                if (verifyInput(newVal)) {
+                                                    e.target.textContent = nodes[index];
+                                                } else {
+                                                    const oldKey = nodes[index];
+                                                    const tempNode = displayList.current.search(oldKey);
+                                                    if (tempNode) tempNode.key = Number(newVal);
+                                                    updateNodes();
+                                                }
+                                                setEditingIndex(null);
+                                            }}
+                                            onKeyDown={(e) => {
+                                                if (e.key === "Enter") {
+                                                    e.preventDefault();
+                                                    e.target.blur();
+                                                }
+                                            }}
+                                        >
+                                            {value}
+                                        </div>
                                     </div>
 
-                            </div>
-                        )}
+                                    {index < nodes.length - 1 && <div className="arrow">→</div>}
+
+                                    <InsertGap
+                                        gapIndex={index + 1}
+                                        activeInsertGap={activeInsertGap}
+                                        insertInputVal={insertInputVal}
+                                        insertInputRef={insertInputRef}
+                                        onActivate={activateGap}
+                                        onChangeVal={setInsertInputVal}
+                                        onCommit={commitInsert}
+                                        onCancel={cancelInsert}
+                                    />
+                                </React.Fragment>
+                            ))}
+
+                            {nodes.length === 0 && (
+                                <span className="empty-list-hint">List is empty. Click + to add a node.</span>
+                            )}
+                        </div>
                     </div>
                 </div>
 
                 <div className="quiz-container">
                     <p className="quiz-title">{question.prompt}</p>
+                    <button className="help-btn" onClick={() => setHelpOpen(true)}>? Help</button>
                     <div className="quiz-navigation">
                         <button className="quiz-button" onClick={handleSubmit}>
                             Submit
