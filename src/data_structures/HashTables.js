@@ -13,7 +13,7 @@ class LinearProbingHashTable {
     this._TOMBSTONE = { __tombstone: true };
     this._count = 0;
     this._nextId = 1;
-    this._maxLoad = 0.75; // resize threshold
+    this._maxLoad = 0.86; // resize threshold
   }
 
   _hash(key) {
