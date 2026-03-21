@@ -127,7 +127,7 @@ function BSTQuizPage() {
         }
 
         setNodesArr(treeToLevelOrder(baseTree));
-        setQuestion({ type, prompt, answer });
+        setQuestion({ type, prompt, answer, baseSnapshot: treeToLevelOrder(baseTree) });
         setEditingNodeIndex(null);
         setEditingNodeValue("");
         setPlaceholderInput({});
@@ -354,9 +354,20 @@ function BSTQuizPage() {
                 <h3 className={isCorrect ? "correct-text" : "incorrect-text"}>
                     {isCorrect ? "Correct!" : "Incorrect"}
                 </h3>
-                <button className="quiz-button" onClick={() => { setFeedbackShowing(false); if (isCorrect) createQuestion(); }}>
-                    {isCorrect ? "Next Question" : "Try Again"}
-                </button>
+        <button className="quiz-button" onClick={() => {
+            setFeedbackShowing(false);
+            if (isCorrect) {
+                createQuestion();
+            } else {
+                setNodesArr([...(question.baseSnapshot || [])]);
+                setEditingNodeIndex(null);
+                setEditingNodeValue("");
+                setPlaceholderInput({});
+                setAnswerShown(false);
+            }
+        }}>
+            {isCorrect ? "Next Question" : "Try Again"}
+        </button>
                 {!isCorrect && (
                     <button className="quiz-button" style={{ marginTop: "0.5rem" }}
                         onClick={() => { setFeedbackShowing(false); createQuestion(); }}>

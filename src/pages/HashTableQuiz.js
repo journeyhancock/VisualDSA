@@ -164,6 +164,7 @@ export default function HashTableQuizPage() {
   const [feedbackShowing, setFeedbackShowing] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
   const [answerShown, setAnswerShown] = useState(false);
+  const [isInsert, setIsInsert] = useState(false);
 
   function createEmptyTableForMode(modeArg) {
     return modeArg === "linear"
@@ -200,17 +201,18 @@ export default function HashTableQuizPage() {
     let prompt, expectedSnapshot;
 
     if (isInsert) {
+      setIsInsert(true);
       const newKV = makeRandomKeyValue(40, 199);
       expectedDS.insert(newKV.key, newKV.value);
       prompt = `What does the hash table look like after Insert(key=${newKV.key}, value=${newKV.value})?`;
       expectedSnapshot = mode === "chaining" ? expectedDS.toBucketsArray() : expectedDS.snapshot();
-      setQuestion({ type: "insert", value: newKV, prompt, expectedSnapshot });
+      setQuestion({ type: "insert", value: newKV, prompt, expectedSnapshot, baseSnapshot: dsToState(baseDS, mode) });
     } else {
       const choice = basePairs[Math.floor(Math.random() * basePairs.length)];
       expectedDS.delete(choice.key);
       prompt = `What does the hash table look like after Delete(key=${choice.key})?`;
       expectedSnapshot = mode === "chaining" ? expectedDS.toBucketsArray() : expectedDS.snapshot();
-      setQuestion({ type: "delete", value: { key: choice.key }, prompt, expectedSnapshot });
+      setQuestion({ type: "delete", value: { key: choice.key }, prompt, expectedSnapshot, baseSnapshot: dsToState(baseDS, mode) });
     }
 
     htRef.current = baseDS;
@@ -339,7 +341,24 @@ export default function HashTableQuizPage() {
             {isCorrect ? "Correct!" : "Incorrect"}
           </h3>
           <button
-            onClick={() => { setFeedbackShowing(false); if (isCorrect) createQuestion(); }}
+            onClick={() => {
+              setFeedbackShowing(false);
+              if (isCorrect) {
+                createQuestion();
+              } else {
+                const base = question.baseSnapshot || [];
+                if (mode === "chaining") {
+                  setChainingBuckets(base.map((b) => b.map((e) => ({ key: e.key, value: e.value }))));
+                } else {
+                  setLinearSlots(base.map((s) => {
+                    if (s === null) return null;
+                    if (s === "T") return "T";
+                    return { key: s.key, value: s.value };
+                  }));
+                }
+                setAnswerShown(false);
+              }
+            }}
             className="quiz-button"
           >
             {isCorrect ? "Next Question" : "Try Again"}
@@ -410,6 +429,9 @@ export default function HashTableQuizPage() {
         {/* Quiz prompt */}
         <div className="quiz-container">
           <p className="quiz-title">{question.prompt}</p>
+          {(isInsert) && (
+            <p className="hash-fn-hint">using hash function: key % {TABLE_SIZE}</p>
+          )}
           <button className="help-btn" onClick={() => setHelpOpen(true)}>? Help</button>
           <div className="quiz-navigation">
             <button className="quiz-button" onClick={handleSubmit}>Submit</button>

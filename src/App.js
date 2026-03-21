@@ -57,7 +57,7 @@ function Home() {
         <Link to="/bst" className="module-link">
           <div className="module">
             <h2 className="module-title">Binary Search Tree</h2>
-            <img src={bstImg} alt="Linked List" className="module-image" />
+            <img src={bstImg} alt="Binary Search Tree" className="module-image" />
           </div>
         </Link>
 
@@ -65,6 +65,27 @@ function Home() {
           <div className="module">
             <h2 className="module-title">Hash Table</h2>
             <img src={hashTableImg} alt="Hash Table" className="module-image" />
+          </div>
+        </Link>
+
+        <Link to="/quiz/linkedlist" className="module-link">
+          <div className="module">
+            <h2 className="module-title">Linked List Quiz</h2>
+            <img src={linkedListImg} alt="Linked List Quiz" className="module-image" />
+          </div>
+        </Link>
+
+        <Link to="/quiz/bst" className="module-link">
+          <div className="module">
+            <h2 className="module-title">Binary Search Tree Quiz</h2>
+            <img src={bstImg} alt="Binary Search Tree Quiz" className="module-image" />
+          </div>
+        </Link>
+
+        <Link to="/quiz/hashtable" className="module-link">
+          <div className="module">
+            <h2 className="module-title">Hash Table Quiz</h2>
+            <img src={hashTableImg} alt="Hash Table Quiz" className="module-image" />
           </div>
         </Link>
 

@@ -527,6 +527,13 @@
   color: #58a6ff;
 }
 
+.hash-fn-hint {
+  font-size: 0.78rem;
+  color: #8b949e;
+  margin-top: -0.5rem;
+  margin-bottom: 0.75rem;
+}
+
 .quiz-navigation {
   position: absolute;
   bottom: 40px;

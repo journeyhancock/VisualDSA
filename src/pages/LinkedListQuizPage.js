@@ -114,9 +114,10 @@ function LinkedListQuizPage() {
             value: val,
             list,
             answer,
+            baseSnapshot: [...list],
             prompt:
                 type === "insert"
-                    ? `What will the linked list look like after Insert(${val})?`
+                    ? `What will the linked list look like after Insert_At_Head(${val})?`
                     : `What will the linked list look like after Delete(${val})?`
         });
 
@@ -244,7 +245,19 @@ function LinkedListQuizPage() {
                     <button
                         onClick={() => {
                             setFeedbackShowing(false);
-                            if (isCorrect) createQuestion();
+                            if (isCorrect) {
+                                createQuestion();
+                            } else {
+                                const base = question.baseSnapshot || [];
+                                const resetList = new LinkedList();
+                                for (let i = base.length - 1; i >= 0; i--) resetList.insert(base[i]);
+                                displayList.current = resetList;
+                                setNodes([...base]);
+                                setActiveInsertGap(null);
+                                setInsertInputVal("");
+                                setEditingIndex(null);
+                                setAnswerShown(false);
+                            }
                         }}
                         className="quiz-button"
                     >
