@@ -67,6 +67,8 @@ function LinkedListQuizPage() {
     const [isCorrect, setIsCorrect] = useState(false);
     const [answerShown, setAnswerShown] = useState(false);
 
+    const [isDelete, setIsDelete] = useState(false);
+
     useEffect(() => {
         if (activeInsertGap !== null && insertInputRef.current) {
             insertInputRef.current.focus();
@@ -107,6 +109,7 @@ function LinkedListQuizPage() {
             const idx = list.indexOf(val);
             answer = [...list];
             if (idx !== -1) answer.splice(idx, 1);
+            setIsDelete(true);
         }
 
         setQuestion({
@@ -385,6 +388,9 @@ function LinkedListQuizPage() {
 
                 <div className="quiz-container">
                     <p className="quiz-title">{question.prompt}</p>
+                    {(isDelete) && (
+                        <p className="ll-fn-hint">Delete will only delete the first node with the target value</p>
+                    )}
                     <button className="help-btn" onClick={() => setHelpOpen(true)}>? Help</button>
                     <div className="quiz-navigation">
                         <button className="quiz-button" onClick={handleSubmit}>

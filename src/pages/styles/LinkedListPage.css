@@ -146,6 +146,7 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
+    margin-right: 60px;
 }
 
 .panel {
@@ -153,6 +154,7 @@
     border: 1px solid #2D333B;
     border-radius: 8px;
     overflow: hidden;
+    width: 245px;
 }
 
 .panel-header {

@@ -8,7 +8,7 @@ import {
 import "../App.css";
 import "./styles/HashTablePage.css";
 
-const SPEED_MULTIPLIER = 7.5;
+const SPEED_MULTIPLIER = 5;
 const delay = (ms) => new Promise(res => setTimeout(res, ms * SPEED_MULTIPLIER));
 
 function verifyInput(value) {

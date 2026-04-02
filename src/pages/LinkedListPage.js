@@ -4,7 +4,7 @@ import {LinkedList} from "../data_structures/LinkedList"
 import "../App.css";
 import "./styles/LinkedListPage.css";
 
-const SPEED_MULTIPLIER = 7.5;
+const SPEED_MULTIPLIER = 5;
 
 const slowTimeout = (fn, ms) =>
   setTimeout(fn, ms * SPEED_MULTIPLIER);

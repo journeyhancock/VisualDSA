@@ -5,7 +5,7 @@ import { Node } from "../data_structures/BST";
 import "../App.css";
 import "./styles/BSTPage.css";
 
-const SPEED_MULTIPLIER = 7.5;
+const SPEED_MULTIPLIER = 5;
 const delay = (ms) => new Promise(res => setTimeout(res, ms * SPEED_MULTIPLIER));
 
 function verifyInput(value) {
@@ -232,74 +232,171 @@ function BSTPage() {
 		if (animating) return;
 		setAnimating(true);
 
-		setActiveLine(1);
-		await delay(300);
-
 		const tree = displayTree.current;
-		const toDelete = tree.search ? tree.search(val) : null;
-		if (selectedKey === val) {
-			setSelectedKey(null);
-			setSelectedNodeCode(generateNodeCode(null));
+
+		setActiveLine(0);
+		await delay(300);
+		if (!tree.root) {
+			setActiveLine(1);
+			await delay(350);
+			alert("Tree is empty.");
+			setAnimating(false);
+			return;
 		}
 
 		setActiveLine(3);
 		await delay(350);
 
+		let curr = tree.root;
+		while (curr) {
+			setHighlightedKey(curr.key);
+			await delay(450);
+			if (val === curr.key) break;
+			curr = val < curr.key ? curr.left : curr.right;
+		}
+
+		setActiveLine(4);
+		await delay(350);
+
+		const toDelete = tree.search ? tree.search(val) : null;
+
 		if (!toDelete) {
-			setActiveLine(4); 
-			await delay(350);
 			alert("Value not found.");
+			setHighlightedKey(null);
 			setAnimating(false);
 			return;
 		}
 
-		// CASE 1 — leaf node
+		if (selectedKey === val) {
+			setSelectedKey(null);
+			setSelectedNodeCode(generateNodeCode(null));
+		}
+
+		// CASE 1: leaf node
 		if (!toDelete.left && !toDelete.right) {
 			setActiveLine(6);
-			setHighlightedKey(toDelete.key);
-			await delay(600);
+			await delay(450);
 
-			setActiveLine(14); 
+			if (!toDelete.parent) {
+				setActiveLine(7);
+				await delay(350);
+				setActiveLine(8);
+				await delay(350);
+			} else if (toDelete.parent.left === toDelete) {
+				setActiveLine(9);  
+				await delay(350);
+				setActiveLine(10); 
+				await delay(350);
+			} else {
+				setActiveLine(12); 
+				await delay(350);
+			}
+
+			setActiveLine(15); 
+			await delay(350);
 			tree.treeDelete(val);
 			updateNodes();
 
-			await delay(500);
+			setActiveLine(16); 
+			await delay(400);
 			setHighlightedKey(null);
 			setAnimating(false);
 			return;
 		}
 
-		// CASE 2 — one child
+		// CASE 2: one child 
 		if (!toDelete.left || !toDelete.right) {
-			setActiveLine(17);
-			setHighlightedKey(toDelete.key);
-			await delay(600);
+			setActiveLine(19); 
+			await delay(450);
 
-			setActiveLine(31); 
+			setActiveLine(20); 
+			await delay(300);
+
+			if (toDelete.left) {
+				setActiveLine(21); 
+				await delay(300);
+				setActiveLine(22); 
+				await delay(350);
+			} else {
+				setActiveLine(24); 
+				await delay(350);
+			}
+
+			if (!toDelete.parent) {
+				setActiveLine(27); 
+				await delay(300);
+				setActiveLine(28); 
+				await delay(350);
+			} else if (toDelete.parent.left === toDelete) {
+				setActiveLine(29); 
+				await delay(300);
+				setActiveLine(30); 
+				await delay(350);
+			} else {
+				setActiveLine(32); 
+				await delay(350);
+			}
+
+			setActiveLine(35);
+			await delay(350);
+			setActiveLine(36);
+			await delay(350);
 			tree.treeDelete(val);
 			updateNodes();
 
-			await delay(500);
+			setActiveLine(38); 
+			await delay(400);
 			setHighlightedKey(null);
 			setAnimating(false);
 			return;
 		}
 
-		// CASE 3 — two children
-		setActiveLine(34);
-		await delay(400);
+		// CASE 3: two children
+		setActiveLine(41);
+		await delay(450);
 
-		const succ = tree.findSuccessor(val);
+		const succ = tree.findSuccessor ? tree.findSuccessor(val) : null;
+
+		setActiveLine(43);
+		await delay(350);
+
 		if (succ) {
-			setActiveLine(36);
+			let s = tree.root;
+			while (s && s.key !== succ.key) {
+				setHighlightedKey(s.key);
+				await delay(350);
+				s = succ.key < s.key ? s.left : s.right;
+			}
 			setHighlightedKey(succ.key);
-			await delay(500);
+
+			setActiveLine(44);
+			await delay(450);
+
+			if (succ.parent && succ.parent.left === succ) {
+				setActiveLine(46); 
+				await delay(350);
+				setActiveLine(47);
+				await delay(350);
+			} else {
+				setActiveLine(49); 
+				await delay(350);
+			}
+
+			if (succ.right) {
+				setActiveLine(52); 
+				await delay(350);
+				setActiveLine(53);
+				await delay(350);
+			}
+
+			setActiveLine(56);
+			await delay(400);
 		}
 
 		tree.treeDelete(val);
 		updateNodes();
 
-		setActiveLine(51); 
+		setActiveLine(59); 
 		await delay(400);
 
 		setHighlightedKey(null);

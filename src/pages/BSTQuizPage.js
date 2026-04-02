@@ -101,6 +101,7 @@ function BSTQuizPage() {
     const [feedbackShowing,  setFeedbackShowing]   = useState(false);
     const [isCorrect,        setIsCorrect]         = useState(false);
     const [answerShown,      setAnswerShown]       = useState(false);
+    const [isDelete,         setIsDelete]          = useState(false);
 
     const createQuestion = useCallback(() => {
         const count = Math.floor(Math.random() * 2) + 3;
@@ -124,6 +125,7 @@ function BSTQuizPage() {
             answerTree.treeDelete(delVal);
             prompt = `What will the BST look like after Delete(${delVal})?`;
             answer = treeToLevelOrder(answerTree);
+            setIsDelete(true);
         }
 
         setNodesArr(treeToLevelOrder(baseTree));
@@ -334,7 +336,7 @@ function BSTQuizPage() {
                         <li><strong>Delete a node:</strong> Hover a node and click X above it. The in-order successor (right-child) or predecessor (if no right child) is promoted automatically.</li>
                         <li><strong>Edit a value:</strong> Click a node's number to edit it in place. Press <kbd>Enter</kbd> to confirm.</li>
                     </ul>
-                    <p className="help-note">Tip: When deleting a node sometimes the display will automatically update, this is not always correct. It is up to the user to ensure the tree is correct after a Delete operation.</p>
+                    <p className="help-note">Tip: Delete expects you to promote the inorder successor when the node to delete has two children</p>
                 </div>
             </div>
         </div>
@@ -417,6 +419,9 @@ function BSTQuizPage() {
 
                 <div className="quiz-container">
                     <p className="quiz-title">{question.prompt}</p>
+                    {(isDelete) && (
+                        <p className="bst-fn-hint">The display will automatically promote the in order successor when a node with children is deleted (this is not always correct)</p>
+                    )}
                     <button className="help-btn" onClick={() => setHelpOpen(true)}>? Help</button>
                     <div className="quiz-navigation">
                         <button className="quiz-button" onClick={handleSubmit}>Submit</button>
