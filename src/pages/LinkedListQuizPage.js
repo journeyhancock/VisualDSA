@@ -104,6 +104,7 @@ function LinkedListQuizPage() {
             val = Math.floor(Math.random() * 9) + 1;
             answer = [...list];
             answer.splice(0, 0, val);
+            setIsDelete(false);
         } else {
             val = list[Math.floor(Math.random() * list.length)];
             const idx = list.indexOf(val);
