@@ -120,6 +120,7 @@ function BSTQuizPage() {
             answerTree.insert(value);
             prompt = `What will the BST look like after Insert(${value})?`;
             answer = treeToLevelOrder(answerTree);
+            setIsDelete(false);
         } else {
             const delVal = arr[Math.floor(Math.random() * arr.length)];
             answerTree.treeDelete(delVal);

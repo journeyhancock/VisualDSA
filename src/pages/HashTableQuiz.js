@@ -208,6 +208,7 @@ export default function HashTableQuizPage() {
       expectedSnapshot = mode === "chaining" ? expectedDS.toBucketsArray() : expectedDS.snapshot();
       setQuestion({ type: "insert", value: newKV, prompt, expectedSnapshot, baseSnapshot: dsToState(baseDS, mode) });
     } else {
+      setIsInsert(false);
       const choice = basePairs[Math.floor(Math.random() * basePairs.length)];
       expectedDS.delete(choice.key);
       prompt = `What does the hash table look like after Delete(key=${choice.key})?`;
