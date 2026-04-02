@@ -1,0 +1,15 @@
+void removeKey(vector<int>& keys, vector<int>& values, int key) {
+  int n = keys.size();
+  int idx = abs(key) % n;
+
+  for (int i = 0; i < n; ++i) {
+    int probe = (idx + i) % n;
+
+    if (keys[probe] == EMPTY) return;
+    if (keys[probe] == key) {
+      keys[probe] = TOMBSTONE;
+      values[probe] = 0;
+      return;
+    }
+  }
+}

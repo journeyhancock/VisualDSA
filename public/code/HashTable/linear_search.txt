@@ -1,0 +1,12 @@
+int search(const vector<int>& keys, const vector<int>& values, int key) {
+  int n = keys.size();
+  int idx = abs(key) % n;
+
+  for (int i = 0; i < n; ++i) {
+    int probe = (idx + i) % n;
+    if (keys[probe] == EMPTY) return -1; // not found
+    if (keys[probe] == key) return values[probe];
+  }
+  
+  return -1;
+}

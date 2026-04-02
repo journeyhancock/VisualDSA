@@ -1,0 +1,61 @@
+Node* delete_node(Node* root, int val) {
+    if (root == nullptr) return nullptr;
+
+    Node* to_delete = search(root, val);
+    if (to_delete == nullptr) return nullptr;
+
+    if (to_delete->left == nullptr && to_delete->right == nullptr) {
+        if (to_delete->parent == nullptr) {
+            root = nullptr;
+        } else if (to_delete->parent->left == to_delete) {
+            to_delete->parent->left = nullptr;
+        } else {
+            to_delete->parent->right = nullptr;
+        }
+
+        delete to_delete;
+        return root;
+    }
+
+    if (to_delete->left == nullptr || to_delete->right == nullptr) {
+        Node* child;
+        if (to_delete->left != nullptr) {
+            child = to_delete->left;
+        } else {
+            child = to_delete->right;
+        }
+
+        if (to_delete->parent == nullptr) {
+            root = child;
+        } else if (to_delete->parent->left == to_delete) {
+            to_delete->parent->left = child;
+        } else {
+            to_delete->parent->right = child;
+        }
+
+        child->parent = to_delete->parent;
+        delete to_delete;
+
+        return root;
+    }
+
+    Node* successor = findSuccessor(root, to_delete->val);
+
+    if (successor != nullptr) {
+        to_delete->val = successor->val;
+
+        if (successor->parent->left == successor) {
+            successor->parent->left = successor->right;
+        } else {
+            successor->parent->right = successor->right;
+        }
+
+        if (successor->right != nullptr) {
+            successor->right->parent = successor->parent;
+        }
+
+        delete successor;
+    }
+
+    return root;
+}

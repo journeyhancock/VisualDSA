@@ -1,0 +1,6 @@
+Node* node_NUM {
+    int value = X;
+    Node* left = node_NUM;
+    Node* right = node_NUM;
+    Node* parent = node_NUM;
+}

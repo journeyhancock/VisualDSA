@@ -1,0 +1,30 @@
+Node* insert_node(Node* root, int val) {
+    if (root == nullptr) return nullptr;
+
+    Node* to_insert = new Node(val);
+    Node* curr_node = root;
+
+    while (curr_node != nullptr) {
+        if (val < curr_node->val) {
+            if (curr_node->left == nullptr) {
+                curr_node->left = to_insert;
+                to_insert->parent = curr_node;
+
+                return root;
+            } else {
+                curr_node = curr_node->left;
+            }
+        } else {
+            if (curr_node->right == nullptr) {
+                curr_node->right = to_insert;
+                to_insert->parent = curr_node;
+                
+                return root;
+            } else {
+                curr_node = curr_node->right;
+            }
+        }
+    }
+
+    return root;
+}

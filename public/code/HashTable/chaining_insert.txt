@@ -1,0 +1,15 @@
+void insert(vector<Node*>& table, int key, int val) {
+  int idx = abs(key) % table.size();
+  Node* head = table[idx];
+  
+  for (Node* cur = head; cur != nullptr; cur = cur->next) {
+    if (cur->key == key) {
+      cur->value = val;
+      return;
+    }
+  }
+
+  Node* n = new Node(key, val);
+  n->next = head;
+  table[idx] = n;
+}

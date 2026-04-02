@@ -1,0 +1,16 @@
+void removeKey(vector<Node*>& table, int key) {
+  int idx = abs(key) % table.size();
+  Node* cur = table[idx];
+  Node* prev = nullptr;
+  
+  while (cur) {
+    if (cur->key == key) {
+      if (!prev) table[idx] = cur->next;
+      else prev->next = cur->next;
+      delete cur;
+      return;
+    }
+    prev = cur;
+    cur = cur->next;
+  }
+}

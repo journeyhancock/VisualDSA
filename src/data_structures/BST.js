@@ -1,9 +1,11 @@
 class Node {
+    static nextId = 0;
     constructor() {
         this.parent = null;
         this.left = null;
         this.right = null;
         this.key = null;
+        this._id = Node.nextId++;
     }
 }
 
@@ -181,7 +183,7 @@ class BST {
     }
 
     toArray = function() {
-        if (!this.root) return null;
+        if (!this.root) return [];
         
         const nodes = [];
         const queue = [this.root];
@@ -206,9 +208,9 @@ class BST {
     }
 
     getHeight = function() {
-        let curr = this.root;
+        //let curr = this.root;
 
-        
+        return 0
     }
 }
 

@@ -1,0 +1,25 @@
+Node* delete_node(Node* head, int val) {
+    if (head == nullptr) return nullptr;
+
+    if (head->val == val) {
+        Node* new_head = head->next;
+        delete head;
+        return new_head;
+    }
+
+    prev_node = head;
+    curr_node = head->next;
+
+    while (curr_node != nullptr) {
+        if (curr_node->val == val) {
+            prev_node->next = curr_node->next;
+            delete curr_node;
+            return head;
+        }
+
+        prev_node = curr_node;
+        curr_node = curr_node->next;
+    }
+
+    return head;
+}

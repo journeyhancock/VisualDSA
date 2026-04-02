@@ -1,52 +1,119 @@
-import banner from './BannerText.png';
-import linkedListImg from './linkedList.png'; // Image Credit: https://github.com/ngryman/ds-linked-list
-import bstImg from './bst.png'; // Image Credit: https://www.cs.cmu.edu/~rdriley/121/notes/bst/
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import './App.css';
+import {BrowserRouter as Router, Routes, Route, Link} from 'react-router-dom';
+import headerBanner from "./assets/images/banner_text.png";
+import linkedListImg from "./assets/images/linked_list.png"
+import bstImg from "./assets/images/bst.png"
+import hashTableImg from "./assets/images/hash_table.png"
 
-import LinkedListPage from "./LinkedListPage";
-import BSTPage from "./BSTPage"
+import LinkedListPage from "./pages/LinkedListPage";
+import BSTPage from "./pages/BSTPage";
+import LinkedListQuizPage from "./pages/LinkedListQuizPage";
+import BSTQuizPage from './pages/BSTQuizPage';
+import HashTablePage from './pages/HashTablePage';
+import HashTableQuizPage from './pages/HashTableQuiz';
 
-function Layout({ children }) {
+import {useState} from "react";
+
+function Sidebar({isOpen, toggleSidebar}) {
+  return (
+    <div className={`sidebar ${isOpen ? "open" : ''}`}>
+      <div className="sidebar-list">
+        <h3>Visualize</h3>
+        <ul>
+          <li><Link to="/linkedlist" onClick={toggleSidebar}>Linked List</Link></li>
+          <li><Link to="/bst" onClick={toggleSidebar}>Binary Search Tree</Link></li>
+          <li><Link to="/hashtable" onClick={toggleSidebar}>Hash Table</Link></li>
+        </ul>
+
+        <h3>Quiz</h3>
+        <ul>
+          <li><Link to="/quiz/linkedlist" onClick={toggleSidebar}>Linked List</Link></li>
+          <li><Link to="/quiz/bst" onClick={toggleSidebar}>Binary Search Tree</Link></li>
+          <li><Link to="/quiz/hashtable" onClick={toggleSidebar}>Hash Table</Link></li>
+        </ul>
+
+      </div>
+    </div>
+  )
+}
+
+function Home() {
   return (
     <div className="App">
-      {children}
+      {/* Banner Header */}
+      <header className="header">
+        <img src={headerBanner} alt="VisualDSA" className="header-banner" />
+      </header>
+
+      {/* Module Grid */}
+      <div className="modules">
+        <Link to="/linkedlist" className="module-link">
+          <div className="module">
+            <h2 className="module-title">Linked List</h2>
+            <img src={linkedListImg} alt="Linked List" className="module-image" />
+          </div>
+        </Link>
+
+        <Link to="/bst" className="module-link">
+          <div className="module">
+            <h2 className="module-title">Binary Search Tree</h2>
+            <img src={bstImg} alt="Binary Search Tree" className="module-image" />
+          </div>
+        </Link>
+
+        <Link to="/hashtable" className="module-link">
+          <div className="module">
+            <h2 className="module-title">Hash Table</h2>
+            <img src={hashTableImg} alt="Hash Table" className="module-image" />
+          </div>
+        </Link>
+
+        <Link to="/quiz/linkedlist" className="module-link">
+          <div className="module">
+            <h2 className="module-title">Linked List Quiz</h2>
+            <img src={linkedListImg} alt="Linked List Quiz" className="module-image" />
+          </div>
+        </Link>
+
+        <Link to="/quiz/bst" className="module-link">
+          <div className="module">
+            <h2 className="module-title">Binary Search Tree Quiz</h2>
+            <img src={bstImg} alt="Binary Search Tree Quiz" className="module-image" />
+          </div>
+        </Link>
+
+        <Link to="/quiz/hashtable" className="module-link">
+          <div className="module">
+            <h2 className="module-title">Hash Table Quiz</h2>
+            <img src={hashTableImg} alt="Hash Table Quiz" className="module-image" />
+          </div>
+        </Link>
+
+      </div>
     </div>
   );
 }
 
 function App() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+
   return (
     <Router>
+      <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+      <div className="hamburger" onClick={toggleSidebar}>
+        <span className="hamburger-text">
+          {sidebarOpen ? "Close Navigation" : "Open Navigation"}
+        </span>
+      </div>
       <Routes>
-        <Route path="/" element={
-          <Layout>
-            <div className="header">
-              <img src={banner} alt="VisualDSA" className="header-banner" />
-            </div>
-            <div className="modules">
-              <Link to="/linkedlist" className="selection">
-                <img src={linkedListImg} alt="Linked List" className="selection-image" />
-                <span className="selection-text">Linked List</span>
-              </Link>
-              <Link to="/binarysearchtree" className="selection">
-                <img src={bstImg} alt="Binary Search Tree" className="selection-image" />
-                <span className="selection-text">Binary Search Tree</span>
-              </Link>
-            </div>
-          </Layout>
-        }/>
-      
-        <Route path="/linkedlist" element={
-          <Layout>
-            <LinkedListPage />
-          </Layout>
-        }/>
-        <Route path="/binarysearchtree" element={
-          <Layout>
-            <BSTPage />
-          </Layout>
-        }/>
+        <Route path="/" element={<Home />} />
+        <Route path="/linkedlist" element={<LinkedListPage />} />
+        <Route path="/bst" element={<BSTPage />} />
+        <Route path="/hashtable" element={<HashTablePage />} />
+        <Route path="/quiz/linkedlist" element={<LinkedListQuizPage />} />
+        <Route path="/quiz/bst" element={<BSTQuizPage />} />
+        <Route path="/quiz/hashtable" element={<HashTableQuizPage />} />
       </Routes>
     </Router>
   );

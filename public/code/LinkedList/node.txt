@@ -1,0 +1,4 @@
+Node* node_NUM {
+    int value = X;
+    Node* next = node_NUM;
+}
